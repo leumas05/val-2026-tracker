@@ -225,9 +225,10 @@
 
         <div class="section">
             <h2>Interaktiv Karta</h2>
-            <p style="text-align: center; margin-bottom: 15px; color: #555;">Utforska valdistrikt, kommuner och regioner direkt i SVT:s egna kartverktyg (du kan även söka och jämföra med tidigare val).</p>
-            <div style="width: 100%; height: 600px; border-radius: 8px; overflow: hidden; box-shadow: inset 0 0 10px rgba(0,0,0,0.1);">
-                <iframe src="https://www.svt.se/datajournalistik/sa-rostade-svenskarna/?view=map&year=2026&live2026=true&fromApp=true" style="width: 100%; height: 100%; border: none;" allowfullscreen></iframe>
+            <p style="text-align: center; margin-bottom: 15px; color: #555;">Utforska valdistrikt, kommuner och regioner direkt i SVT:s egna kartverktyg. Sök efter din ort!</p>
+            <div id="map-wrapper" style="position: relative; width: 100%; height: 750px; border-radius: 8px; overflow: hidden; box-shadow: inset 0 0 10px rgba(0,0,0,0.1); background: #fff;">
+                <button onclick="document.getElementById('map-wrapper').requestFullscreen()" style="position: absolute; top: 15px; right: 15px; z-index: 1000; padding: 10px 15px; font-size: 0.9rem; background: rgba(52, 152, 219, 0.9); box-shadow: 0 4px 6px rgba(0,0,0,0.3);">Helskärm ⛶</button>
+                <iframe src="https://www.svt.se/datajournalistik/sa-rostade-svenskarna/?view=map&year=2026&live2026=true" style="width: 100%; height: 100%; border: none;" scrolling="no" allowfullscreen></iframe>
             </div>
         </div>
 
