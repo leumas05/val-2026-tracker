@@ -426,19 +426,12 @@
             let titleText = 'Riket (Hela Sverige)';
 
             if (hash && typeof PLATS_MAP !== 'undefined') {
-                const id = PLATS_MAP[hash];
-                if (id) {
-                    const slug = slugify(hash);
-                    if (hash.includes('län')) {
-                        path = `regionval-${id}-${slug}.html`;
-                        titleText = hash.charAt(0).toUpperCase() + hash.slice(1);
-                    } else {
-                        // SVT lägger till -kommun om det inte redan är det ibland, men vanligtvis sluggar de bara namnet
-                        path = `kommunval-${id}-${slug}.html`;
-                        // Fallback om namnet har "kommun"
-                        if (slug.endsWith('-kommun')) path = `kommunval-${id}-${slug}.html`;
-                        titleText = hash.charAt(0).toUpperCase() + hash.slice(1);
-                        if (!titleText.includes('kommun')) titleText += ' kommun';
+                const svtPath = PLATS_MAP[hash];
+                if (svtPath) {
+                    path = svtPath;
+                    titleText = hash.charAt(0).toUpperCase() + hash.slice(1);
+                    if (svtPath.includes('kommunval') && !titleText.toLowerCase().includes('kommun')) {
+                        titleText += ' kommun';
                     }
                 } else {
                     alert('Kunde inte hitta platsen. Kontrollera stavningen.');
