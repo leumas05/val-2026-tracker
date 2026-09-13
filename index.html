@@ -478,12 +478,12 @@
                     }
 
                     partyElements.forEach(el => {
-                        const partyName = el.innerText.trim();
+                        const partyName = el.textContent.trim();
                         if (partyColors[partyName]) {
                             let parent = el.parentElement;
                             let limit = 5; 
                             while (parent && limit > 0) {
-                                const textContent = parent.innerText.replace(/\s+/g, ' ');
+                                const textContent = parent.textContent.replace(/\s+/g, ' ');
                                 const voteMatch = textContent.match(/([\d\s]+)röster/);
                                 const mandateMatch = textContent.match(/(\d+)\s*av\s*(\d+)\s*mandat/);
                                 
