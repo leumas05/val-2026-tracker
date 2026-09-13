@@ -6,8 +6,16 @@ const path = require('path');
 const PORT = 3000;
 
 http.createServer((req, res) => {
-    // Enable CORS for local testing if needed
+    // Sätt CORS-headers
     res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+    if (req.method === 'OPTIONS') {
+        res.writeHead(200);
+        res.end();
+        return;
+    }
 
     if (req.url === '/' || req.url === '/index.html') {
         fs.readFile(path.join(__dirname, 'index.html'), (err, content) => {
@@ -20,9 +28,18 @@ http.createServer((req, res) => {
             res.end(content);
         });
     } 
-    else if (req.url === '/api/svt') {
+    else if (req.url.startsWith('/api/svt')) {
+        // Parse url for path parameter
+        const urlObj = new URL(req.url, 'http://localhost');
+        const svtPath = urlObj.searchParams.get('path') || '';
+        const svtUrl = 'https://valresultat.svt.se/2026/' + svtPath;
+
         // Proxy the request to SVT
-        https.get('https://valresultat.svt.se/2026/', (svtRes) => {
+        https.get(svtUrl, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0 Safari/537.36'
+            }
+        }, (svtRes) => {
             // Forward headers except those that might mess up the response (like encoding if we manipulate it, or strict CSP)
             const headers = { ...svtRes.headers };
             delete headers['content-security-policy'];

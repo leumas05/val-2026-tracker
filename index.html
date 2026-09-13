@@ -210,25 +210,54 @@
     <div id="status">Hämtar och analyserar data från SVT...</div>
 
     <div style="display: none;" id="content-area">
-        
-        <div class="section">
-            <h2>Riksdagen</h2>
+    <div class="container">
+        <header>
+            <div style="flex: 1;">
+                <h1 id="page-title">Val 2026: Riksdagen</h1>
+                <p>Liveresultat direkt från SVT</p>
+            </div>
             
-            <!-- Riksdagen Halvcirkel (Chart.js) -->
-            <div class="chart-container">
-                <canvas id="parliamentChart"></canvas>
+            <div style="flex: 1; text-align: right;">
+                <!-- Enkelt sökfält som letar i datalistan nedan -->
+                <form id="search-form" onsubmit="handleSearch(event)" style="display:inline-block; position:relative;">
+                    <input type="text" id="lokal-sok" placeholder="Sök kommun eller region..." style="padding: 10px; border-radius: 5px; border: 1px solid #ccc; width: 220px; font-size: 1rem;">
+                    <button type="submit" style="padding: 10px 15px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem;">Sök</button>
+                    <!-- Listan genereras dynamiskt av JavaScript nedan -->
+                    <datalist id="kommun-lista"></datalist>
+                </form>
+                <div style="margin-top: 10px;">
+                    <a href="#" onclick="window.location.hash=''; window.location.reload(); return false;" style="color: #3498db; text-decoration: none; font-size: 0.9rem;">Tillbaka till Riket (Hela Sverige)</a>
+                </div>
+            </div>
+        </header>
+
+        <div id="loading" class="loading">
+            Laddar live-resultat från SVT...
+        </div>
+
+        <div class="section" id="data-section" style="display: none;">
+            <h2>Resultat</h2>
+            <div id="error-message" style="color: red; text-align: center; display: none;"></div>
+            <!-- Rest of code is unchanged below... -->
+            
+            <div style="text-align: center; margin-bottom: 20px;">
+                <canvas id="parliamentChart" style="max-width: 600px; margin: 0 auto;"></canvas>
+            </div>
+            
+            <!-- Rak Linje för Mandatfördelning -->
+            <div style="text-align: center; margin-top: 10px; margin-bottom: 30px; position: relative;">
+                <div style="font-weight: bold; margin-bottom: 5px; font-size: 0.9rem;" id="mandate-target">175 mandat</div>
+                <div class="mandate-bar" id="mandateBar"></div>
+                <div class="mandate-divider"></div>
             </div>
 
-            <!-- Rak Mandatlinje -->
-            <div class="mandate-bar-wrapper">
-                <div class="center-line"><span>175 mandat</span></div>
-                <div class="mandate-bar" id="mandate-bar">
-                    <!-- Fylls på dynamiskt via JS -->
-                </div>
+            <div class="party-grid" id="parties">
+                <!-- Partier genereras här -->
             </div>
         </div>
 
         <div class="section" id="map-section" style="min-height: 800px;">
+
             <h2>Interaktiv Karta</h2>
             <p style="text-align: center; margin-bottom: 15px; color: #555;">Utforska valdistrikt, kommuner och regioner direkt i SVT:s egna kartverktyg. Sök efter din ort!</p>
             
@@ -338,19 +367,11 @@
     <script>
         const proxyUrl = '/api/svt';
         let parliamentChartInstance = null; // För att kunna uppdatera grafen
-        
+    </script>
+    <!-- Inkludera vår ordbok över alla kommuner och regioner -->
+    <script src="plats_map.js"></script>
+    <script>
         const partyColors = {
-            'Vänsterpartiet': 'var(--color-V)',
-            'Socialdemokraterna': 'var(--color-S)',
-            'Miljöpartiet': 'var(--color-MP)',
-            'Centerpartiet': 'var(--color-C)',
-            'Liberalerna': 'var(--color-L)',
-            'Moderaterna': 'var(--color-M)',
-            'Kristdemokraterna': 'var(--color-KD)',
-            'Sverigedemokraterna': 'var(--color-SD)'
-        };
-        
-        const partyHexColors = {
             'Vänsterpartiet': '#DA291C',
             'Socialdemokraterna': '#E8112d',
             'Miljöpartiet': '#83CF39',
@@ -358,59 +379,139 @@
             'Liberalerna': '#006AB3',
             'Moderaterna': '#52BDEC',
             'Kristdemokraterna': '#000077',
-            'Sverigedemokraterna': '#DDDF00'
+            'Sverigedemokraterna': '#DDDD00'
         };
+        const partyHexColors = {
+            'Vänsterpartiet': '#DA291C', 'Socialdemokraterna': '#E8112d', 'Miljöpartiet': '#83CF39',
+            'Centerpartiet': '#009933', 'Liberalerna': '#006AB3', 'Moderaterna': '#52BDEC',
+            'Kristdemokraterna': '#000077', 'Sverigedemokraterna': '#DDDD00'
+        };
+        const leftToRightOrder = ['Vänsterpartiet', 'Socialdemokraterna', 'Miljöpartiet', 'Centerpartiet', 'Liberalerna', 'Moderaterna', 'Kristdemokraterna', 'Sverigedemokraterna'];
+        let parliamentChartInstance = null;
 
-        // Traditionell svensk ordning från vänster till höger i riksdagen
-        const leftToRightOrder = [
-            'Vänsterpartiet', 
-            'Socialdemokraterna', 
-            'Miljöpartiet', 
-            'Centerpartiet', 
-            'Liberalerna', 
-            'Moderaterna', 
-            'Kristdemokraterna', 
-            'Sverigedemokraterna'
-        ];
+        // Fyll datalistan
+        window.addEventListener('DOMContentLoaded', () => {
+            const datalist = document.getElementById('kommun-lista');
+            if (datalist && typeof PLATS_MAP !== 'undefined') {
+                Object.keys(PLATS_MAP).forEach(name => {
+                    // Snygga till namnet med stor bokstav
+                    const capitalized = name.charAt(0).toUpperCase() + name.slice(1);
+                    const option = document.createElement('option');
+                    option.value = capitalized;
+                    datalist.appendChild(option);
+                });
+            }
+            // Kör första fetchen
+            handleHashChange();
+        });
 
-        function fetchData() {
+        function slugify(text) {
+            return text.toString().toLowerCase().trim()
+                .replace(/å/g, 'a').replace(/ä/g, 'a').replace(/ö/g, 'o').replace(/é/g, 'e')
+                .replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-');
+        }
+
+        function handleSearch(event) {
+            if (event) event.preventDefault();
+            const val = document.getElementById('lokal-sok').value.trim();
+            if (!val) window.location.hash = '';
+            else window.location.hash = val;
+        }
+
+        window.addEventListener('hashchange', handleHashChange);
+
+        function handleHashChange() {
+            let hash = decodeURIComponent(window.location.hash.substring(1)).toLowerCase();
+            let path = '';
+            let titleText = 'Riket (Hela Sverige)';
+
+            if (hash && typeof PLATS_MAP !== 'undefined') {
+                const id = PLATS_MAP[hash];
+                if (id) {
+                    const slug = slugify(hash);
+                    if (hash.includes('län')) {
+                        path = `regionval-${id}-${slug}.html`;
+                        titleText = hash.charAt(0).toUpperCase() + hash.slice(1);
+                    } else {
+                        // SVT lägger till -kommun om det inte redan är det ibland, men vanligtvis sluggar de bara namnet
+                        path = `kommunval-${id}-${slug}.html`;
+                        // Fallback om namnet har "kommun"
+                        if (slug.endsWith('-kommun')) path = `kommunval-${id}-${slug}.html`;
+                        titleText = hash.charAt(0).toUpperCase() + hash.slice(1);
+                        if (!titleText.includes('kommun')) titleText += ' kommun';
+                    }
+                } else {
+                    alert('Kunde inte hitta platsen. Kontrollera stavningen.');
+                    window.location.hash = '';
+                    return;
+                }
+            }
+
+            document.getElementById('page-title').innerText = 'Val 2026: ' + titleText;
+            fetchData(path);
+        }
+
+        function fetchData(path = '') {
             const btn = document.getElementById('refresh-btn');
             const statusDiv = document.getElementById('status');
+            const dataSec = document.getElementById('data-section');
+            const loadingDiv = document.getElementById('loading');
             
-            btn.disabled = true;
-            btn.innerText = 'Hämtar...';
-            statusDiv.innerText = 'Hämtar och analyserar data från SVT...';
+            if (btn) { btn.disabled = true; btn.innerText = 'Laddar...'; }
             statusDiv.style.display = 'block';
-            document.getElementById('content-area').style.display = 'none';
+            statusDiv.innerText = 'Hämtar och analyserar data från SVT...';
+            dataSec.style.display = 'none';
+            loadingDiv.style.display = 'block';
 
-            fetch(proxyUrl)
+            let apiUrl = '/api/svt';
+            if (path) { apiUrl += '?path=' + encodeURIComponent(path); }
+
+            fetch(apiUrl)
                 .then(response => {
-                    if (response.ok) return response.text();
-                    throw new Error('Kunde inte hämta data (Status: ' + response.status + ')');
+                    if (!response.ok) throw new Error('Status: ' + response.status);
+                    return response.text();
                 })
-                .then(htmlString => {
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(htmlString, 'text/html');
+                .then(html => {
+                    loadingDiv.style.display = 'none';
                     
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = html;
+
                     const parties = {};
-                    const partyElements = doc.querySelectorAll('.party-text');
+                    const partyElements = tempDiv.querySelectorAll('.party-text');
                     
+                    if (partyElements.length === 0) {
+                        throw new Error("Ingen valdata hittades på SVT för denna plats.");
+                    }
+
                     partyElements.forEach(el => {
-                        const name = el.textContent.trim();
-                        let container = el.closest('li');
-                        if (!container) container = el.parentElement.parentElement;
-                        
-                        if (container) {
-                            const text = container.textContent.replace(/\s+/g, ' ');
-                            const match = text.match(/([\d\s]+)röster/);
-                            if (match) {
-                                const votes = parseInt(match[1].replace(/\s/g, ''), 10);
-                                parties[name] = { votes: votes, mandates: 0 };
+                        const partyName = el.innerText.trim();
+                        if (partyColors[partyName]) {
+                            let parent = el.parentElement;
+                            let limit = 5; 
+                            while (parent && limit > 0) {
+                                const textContent = parent.innerText.replace(/\s+/g, ' ');
+                                const voteMatch = textContent.match(/([\d\s]+)röster/);
+                                const mandateMatch = textContent.match(/(\d+)\s*av\s*(\d+)\s*mandat/);
                                 
-                                const mandateMatch = text.match(/(\d+)\s*av\s*349\s*mandat/);
-                                if (mandateMatch) {
-                                    parties[name].mandates = parseInt(mandateMatch[1], 10);
+                                if (voteMatch) {
+                                    const rawVotesStr = voteMatch[1].replace(/\s/g, '');
+                                    const votes = parseInt(rawVotesStr, 10);
+                                    let mandates = 0;
+                                    let totalMandates = 349;
+                                    
+                                    if (mandateMatch) {
+                                        mandates = parseInt(mandateMatch[1], 10);
+                                        totalMandates = parseInt(mandateMatch[2], 10);
+                                        // Uppdatera mandate-target texten i UI om den ändras (för kommuner)
+                                        document.getElementById('mandate-target').innerText = totalMandates + ' mandat';
+                                    }
+                                    
+                                    parties[partyName] = { votes: votes, mandates: mandates, totalMandates: totalMandates };
+                                    break;
                                 }
+                                parent = parent.parentElement;
+                                limit--;
                             }
                         }
                     });
@@ -418,13 +519,13 @@
                     renderData(parties);
                 })
                 .catch(error => {
+                    loadingDiv.style.display = 'none';
                     statusDiv.innerText = 'Fel vid hämtning: ' + error.message;
                     statusDiv.style.display = 'block';
                     console.error(error);
                 })
                 .finally(() => {
-                    btn.disabled = false;
-                    btn.innerText = 'Hämta ny data';
+                    if (btn) { btn.disabled = false; btn.innerText = 'Hämta ny data'; }
                 });
         }
 
@@ -439,7 +540,7 @@
                 return;
             }
             statusDiv.style.display = 'none';
-            document.getElementById('content-area').style.display = 'block';
+            document.getElementById('data-section').style.display = 'block';
 
             const rightParties = ['Moderaterna', 'Sverigedemokraterna', 'Kristdemokraterna', 'Liberalerna'];
             const leftParties = ['Socialdemokraterna', 'Vänsterpartiet', 'Centerpartiet', 'Miljöpartiet'];
@@ -447,7 +548,7 @@
             let rightSum = 0, leftSum = 0;
             let rightMandates = 0, leftMandates = 0;
 
-            const partyListDiv = document.getElementById('party-list');
+            const partyListDiv = document.getElementById('parties');
             partyListDiv.innerHTML = ''; 
             
             const sortedParties = Object.entries(parties).sort((a, b) => b[1].votes - a[1].votes);
@@ -463,7 +564,7 @@
                 card.className = 'card';
                 let mandateText = mandates > 0 ? `<p style="font-size: 1rem; color: #555; font-weight: normal; margin-top: 5px;">${mandates} mandat</p>` : '';
                 card.innerHTML = `
-                    <h3 class="party-${name.replace(/ /g, '')}">${name}</h3>
+                    <h3 style="color: ${partyColors[name]}">${name}</h3>
                     <p>${formatNumber(votes)}</p>
                     ${mandateText}
                 `;
@@ -495,33 +596,32 @@
         }
 
         function drawVisualizations(parties) {
-            // Sortera data vänster till höger baserat på predefined order
             const orderedData = leftToRightOrder
                 .map(name => ({
                     name: name,
                     mandates: parties[name] ? parties[name].mandates : 0,
+                    totalMandates: parties[name] ? parties[name].totalMandates : 349,
                     colorStr: partyColors[name],
                     hex: partyHexColors[name]
                 }))
                 .filter(p => p.mandates > 0);
 
-            const totalMandates = orderedData.reduce((sum, p) => sum + p.mandates, 0);
-
-            // 1. Rak mandatlinje (Stacked Bar)
-            const mandateBar = document.getElementById('mandate-bar');
+            // 1. Rak mandatlinje
+            const mandateBar = document.getElementById('mandateBar');
             mandateBar.innerHTML = '';
             
+            // All parties share the same totalMandates in this context
+            const totalM = orderedData.length > 0 ? orderedData[0].totalMandates : 349;
+
             orderedData.forEach(p => {
-                const percentage = (p.mandates / 349) * 100; // Vi delar alltid på 349 totala mandat
+                const percentage = (p.mandates / totalM) * 100;
                 const segment = document.createElement('div');
                 segment.className = 'party-segment';
                 segment.style.width = percentage + '%';
                 segment.style.backgroundColor = p.colorStr;
                 segment.title = p.name + ': ' + p.mandates + ' mandat';
                 
-                // Visa bara text om segmentet är tillräckligt stort
                 if (percentage > 3) {
-                    // Kortnamn, första bokstäverna (t.ex. Vänsterpartiet -> V)
                     let shortName = p.name;
                     if(p.name === 'Socialdemokraterna') shortName = 'S';
                     else if(p.name === 'Sverigedemokraterna') shortName = 'SD';
@@ -531,13 +631,12 @@
                     else if(p.name === 'Moderaterna') shortName = 'M';
                     else if(p.name === 'Liberalerna') shortName = 'L';
                     else if(p.name === 'Vänsterpartiet') shortName = 'V';
-                    
                     segment.innerText = shortName;
                 }
                 mandateBar.appendChild(segment);
             });
 
-            // 2. Chart.js (Riksdagen Halvcirkel / Doughnut)
+            // 2. Chart.js
             const ctx = document.getElementById('parliamentChart').getContext('2d');
             
             if (parliamentChartInstance) {
@@ -550,7 +649,7 @@
                     data: orderedData.map(p => p.mandates),
                     backgroundColor: orderedData.map(p => p.hex),
                     borderWidth: 2,
-                    borderColor: '#f4f4f9' // Samma som sidans bakgrund för snyggt avstånd
+                    borderColor: '#fff'
                 }]
             };
 
@@ -560,13 +659,11 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    circumference: 180,    // Halvcirkel
-                    rotation: -90,         // Starta från vänster
-                    cutout: '50%',         // Tjocklek
+                    circumference: 180,
+                    rotation: -90,
+                    cutout: '50%',
                     plugins: {
-                        legend: {
-                            display: false // Vi döljer den vanliga legenden, baren och korten räcker
-                        },
+                        legend: { display: false },
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
@@ -575,16 +672,10 @@
                             }
                         }
                     },
-                    animation: {
-                        animateRotate: true,
-                        animateScale: false
-                    }
+                    animation: { animateRotate: true, animateScale: false }
                 }
             });
         }
-
-        document.getElementById('refresh-btn').addEventListener('click', fetchData);
-        fetchData();
     </script>
 </body>
 </html>
