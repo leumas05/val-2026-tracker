@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Valresultat 2026</title>
+    
+    <!-- Chart.js för riksdagsgraf -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
         :root {
             --bg: #f4f4f9;
@@ -12,18 +16,29 @@
             --red-block: #e74c3c;
             --blue-block: #3498db;
             --diff: #9b59b6;
+            
+            /* Partifärger */
+            --color-V: #DA291C;
+            --color-S: #E8112d;
+            --color-MP: #83CF39;
+            --color-C: #009933;
+            --color-L: #006AB3;
+            --color-M: #52BDEC;
+            --color-KD: #000077;
+            --color-SD: #DDDF00;
+            --color-Ovr: #95a5a6;
         }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--bg);
             color: var(--text);
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             padding: 20px;
         }
 
-        h1, h2 {
+        h1, h2, h3 {
             text-align: center;
         }
 
@@ -43,14 +58,8 @@
             transition: background-color 0.2s;
         }
 
-        button:hover {
-            background-color: #2980b9;
-        }
-        
-        button:disabled {
-            background-color: #95a5a6;
-            cursor: not-allowed;
-        }
+        button:hover { background-color: #2980b9; }
+        button:disabled { background-color: #95a5a6; cursor: not-allowed; }
 
         #status {
             text-align: center;
@@ -59,93 +68,132 @@
             margin-bottom: 20px;
         }
 
+        .section {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+
+        /* Party Grid */
         .party-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             gap: 15px;
-            margin-bottom: 40px;
         }
 
         .card {
-            background: var(--card-bg);
+            background: var(--bg);
             border-radius: 8px;
             padding: 15px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
             text-align: center;
         }
 
-        .card h3 {
-            margin: 0 0 10px 0;
-            font-size: 1.2rem;
-        }
+        .card h3 { margin: 0 0 10px 0; font-size: 1.2rem; }
+        .card p { margin: 0; font-size: 1.5rem; font-weight: bold; }
 
-        .card p {
-            margin: 0;
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-
+        /* Block Cards */
         .blocks-container {
             display: flex;
             justify-content: space-around;
             flex-wrap: wrap;
             gap: 20px;
-            margin-bottom: 30px;
         }
 
         .block-card {
-            background: var(--card-bg);
+            background: var(--bg);
             border-radius: 8px;
             padding: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             text-align: center;
             flex: 1;
             min-width: 250px;
         }
+        .block-card.red { border-top: 5px solid var(--red-block); }
+        .block-card.blue { border-top: 5px solid var(--blue-block); }
 
-        .block-card.red {
-            border-top: 5px solid var(--red-block);
-        }
-
-        .block-card.blue {
-            border-top: 5px solid var(--blue-block);
-        }
-
-        .block-card h3 {
-            margin-top: 0;
-        }
-
-        .block-card p {
-            font-size: 2rem;
-            font-weight: bold;
-            margin: 10px 0;
-        }
+        .block-card h3 { margin-top: 0; }
+        .block-card p { font-size: 2rem; font-weight: bold; margin: 10px 0; }
 
         .diff-card {
-            background: var(--card-bg);
+            background: var(--bg);
             border-radius: 8px;
             padding: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             text-align: center;
             border-top: 5px solid var(--diff);
+            margin-top: 20px;
         }
-        
-        .diff-card p {
-            font-size: 1.8rem;
+        .diff-card p { font-size: 1.8rem; font-weight: bold; margin: 10px 0; }
+
+        /* Vågen & Rak linje */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+        }
+
+        .mandate-bar-wrapper {
+            position: relative;
+            margin: 50px 0 30px 0;
+            width: 100%;
+        }
+
+        .mandate-bar {
+            display: flex;
+            width: 100%;
+            height: 40px;
+            border-radius: 20px;
+            overflow: hidden;
+            background: #e0e0e0;
+        }
+
+        .party-segment {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.85rem;
             font-weight: bold;
-            margin: 10px 0;
+            overflow: hidden;
+            transition: width 0.5s ease;
         }
 
-        /* Party specific colors for headings if desired */
-        .party-Socialdemokraterna { color: #E8112d; }
-        .party-Moderaterna { color: #52BDEC; }
-        .party-Sverigedemokraterna { color: #DDDF00; }
-        .party-Vänsterpartiet { color: #DA291C; }
-        .party-Centerpartiet { color: #009933; }
-        .party-Kristdemokraterna { color: #000077; }
-        .party-Miljöpartiet { color: #83CF39; }
-        .party-Liberalerna { color: #006AB3; }
+        .center-line {
+            position: absolute;
+            top: -15px;
+            bottom: -15px;
+            left: 50%;
+            width: 2px;
+            background: #2c3e50;
+            z-index: 10;
+        }
 
+        .center-line span {
+            position: absolute;
+            top: -25px;
+            left: -30px;
+            width: 60px;
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        /* Party Text Colors */
+        .party-Socialdemokraterna { color: var(--color-S); }
+        .party-Moderaterna { color: var(--color-M); }
+        .party-Sverigedemokraterna { color: var(--color-SD); }
+        .party-Vänsterpartiet { color: var(--color-V); }
+        .party-Centerpartiet { color: var(--color-C); }
+        .party-Kristdemokraterna { color: var(--color-KD); }
+        .party-Miljöpartiet { color: var(--color-MP); }
+        .party-Liberalerna { color: var(--color-L); }
+        
     </style>
 </head>
 <body>
@@ -157,38 +205,104 @@
     <div id="status">Hämtar och analyserar data från SVT...</div>
 
     <div style="display: none;" id="content-area">
-        <h2>Partiernas Röster</h2>
-        <div class="party-grid" id="party-list">
-            <!-- Partikort läggs till här dynamiskt -->
+        
+        <div class="section">
+            <h2>Riksdagen</h2>
+            
+            <!-- Riksdagen Halvcirkel (Chart.js) -->
+            <div class="chart-container">
+                <canvas id="parliamentChart"></canvas>
+            </div>
+
+            <!-- Rak Mandatlinje -->
+            <div class="mandate-bar-wrapper">
+                <div class="center-line"><span>175 mandat</span></div>
+                <div class="mandate-bar" id="mandate-bar">
+                    <!-- Fylls på dynamiskt via JS -->
+                </div>
+            </div>
         </div>
 
-        <h2>Blocken</h2>
-        <div class="blocks-container">
-            <div class="block-card red">
-                <h3>S + V + C + MP</h3>
-                <p id="left-block-votes">0</p>
-                <small>röster</small>
-            </div>
-            <div class="block-card blue">
-                <h3>M + SD + KD + L</h3>
-                <p id="right-block-votes">0</p>
-                <small>röster</small>
+        <div class="section">
+            <h2>Interaktiv Karta</h2>
+            <p style="text-align: center; margin-bottom: 15px; color: #555;">Utforska valdistrikt, kommuner och regioner direkt i SVT:s egna kartverktyg (du kan även söka och jämföra med tidigare val).</p>
+            <div style="width: 100%; height: 600px; border-radius: 8px; overflow: hidden; box-shadow: inset 0 0 10px rgba(0,0,0,0.1);">
+                <iframe src="https://www.svt.se/datajournalistik/sa-rostade-svenskarna/?view=map&year=2026&live2026=true&fromApp=true" style="width: 100%; height: 100%; border: none;" allowfullscreen></iframe>
             </div>
         </div>
 
-        <div class="diff-card">
-            <h3>Skillnad</h3>
-            <p id="diff-votes">0</p>
-            <p style="font-size: 1.2rem; margin-top: 5px; font-weight: normal;" id="diff-text"></p>
+        <div class="section">
+            <h2>Blocken</h2>
+            <div class="blocks-container">
+                <div class="block-card red">
+                    <h3>S + V + C + MP</h3>
+                    <p id="left-block-votes">0</p>
+                    <small>röster</small>
+                    <p id="left-block-mandates" style="font-size: 1.2rem; color: #555; margin-top: 10px;">0 mandat</p>
+                </div>
+                <div class="block-card blue">
+                    <h3>M + SD + KD + L</h3>
+                    <p id="right-block-votes">0</p>
+                    <small>röster</small>
+                    <p id="right-block-mandates" style="font-size: 1.2rem; color: #555; margin-top: 10px;">0 mandat</p>
+                </div>
+            </div>
+
+            <div class="diff-card">
+                <h3>Skillnad</h3>
+                <p id="diff-votes">0</p>
+                <p style="font-size: 1.2rem; margin-top: 5px; font-weight: normal;" id="diff-text"></p>
+            </div>
         </div>
+
+        <div class="section">
+            <h2>Partiernas Röster</h2>
+            <div class="party-grid" id="party-list">
+                <!-- Partikort läggs till här dynamiskt -->
+            </div>
+        </div>
+
     </div>
 
     <script>
-        // Eftersom SVT blockerar publika CORS-proxies (Cloudflare/Akamai) hämtar vi nu datan via vår lokala Node-server.
         const proxyUrl = '/api/svt';
+        let parliamentChartInstance = null; // För att kunna uppdatera grafen
+        
+        const partyColors = {
+            'Vänsterpartiet': 'var(--color-V)',
+            'Socialdemokraterna': 'var(--color-S)',
+            'Miljöpartiet': 'var(--color-MP)',
+            'Centerpartiet': 'var(--color-C)',
+            'Liberalerna': 'var(--color-L)',
+            'Moderaterna': 'var(--color-M)',
+            'Kristdemokraterna': 'var(--color-KD)',
+            'Sverigedemokraterna': 'var(--color-SD)'
+        };
+        
+        const partyHexColors = {
+            'Vänsterpartiet': '#DA291C',
+            'Socialdemokraterna': '#E8112d',
+            'Miljöpartiet': '#83CF39',
+            'Centerpartiet': '#009933',
+            'Liberalerna': '#006AB3',
+            'Moderaterna': '#52BDEC',
+            'Kristdemokraterna': '#000077',
+            'Sverigedemokraterna': '#DDDF00'
+        };
+
+        // Traditionell svensk ordning från vänster till höger i riksdagen
+        const leftToRightOrder = [
+            'Vänsterpartiet', 
+            'Socialdemokraterna', 
+            'Miljöpartiet', 
+            'Centerpartiet', 
+            'Liberalerna', 
+            'Moderaterna', 
+            'Kristdemokraterna', 
+            'Sverigedemokraterna'
+        ];
 
         function fetchData() {
-            // UI state while loading
             const btn = document.getElementById('refresh-btn');
             const statusDiv = document.getElementById('status');
             
@@ -212,18 +326,20 @@
                     
                     partyElements.forEach(el => {
                         const name = el.textContent.trim();
-                        // Leta upp närmaste li element (som brukar omge hela raden)
                         let container = el.closest('li');
-                        // Fallback om strukturen ändrats något
                         if (!container) container = el.parentElement.parentElement;
                         
                         if (container) {
                             const text = container.textContent.replace(/\s+/g, ' ');
-                            // Matcha "1 008 035 röster"
                             const match = text.match(/([\d\s]+)röster/);
                             if (match) {
                                 const votes = parseInt(match[1].replace(/\s/g, ''), 10);
-                                parties[name] = votes;
+                                parties[name] = { votes: votes, mandates: 0 };
+                                
+                                const mandateMatch = text.match(/(\d+)\s*av\s*349\s*mandat/);
+                                if (mandateMatch) {
+                                    parties[name].mandates = parseInt(mandateMatch[1], 10);
+                                }
                             }
                         }
                     });
@@ -248,61 +364,155 @@
         function renderData(parties) {
             const statusDiv = document.getElementById('status');
             if (Object.keys(parties).length === 0) {
-                statusDiv.innerText = 'Kunde inte hitta några röster i SVT:s data. (Strukturen kanske har ändrats).';
+                statusDiv.innerText = 'Kunde inte hitta några röster i SVT:s data.';
                 return;
             }
             statusDiv.style.display = 'none';
             document.getElementById('content-area').style.display = 'block';
 
-            // Gruppering av block
             const rightParties = ['Moderaterna', 'Sverigedemokraterna', 'Kristdemokraterna', 'Liberalerna'];
             const leftParties = ['Socialdemokraterna', 'Vänsterpartiet', 'Centerpartiet', 'Miljöpartiet'];
 
-            let rightSum = 0;
-            let leftSum = 0;
+            let rightSum = 0, leftSum = 0;
+            let rightMandates = 0, leftMandates = 0;
 
             const partyListDiv = document.getElementById('party-list');
-            partyListDiv.innerHTML = ''; // Rensa tidigare data!
+            partyListDiv.innerHTML = ''; 
             
-            // Sortera partierna efter antal röster fallande
-            const sortedParties = Object.entries(parties).sort((a, b) => b[1] - a[1]);
+            const sortedParties = Object.entries(parties).sort((a, b) => b[1].votes - a[1].votes);
 
-            sortedParties.forEach(([name, votes]) => {
-                if (rightParties.includes(name)) rightSum += votes;
-                if (leftParties.includes(name)) leftSum += votes;
+            sortedParties.forEach(([name, data]) => {
+                const votes = data.votes;
+                const mandates = data.mandates;
+
+                if (rightParties.includes(name)) { rightSum += votes; rightMandates += mandates; }
+                if (leftParties.includes(name)) { leftSum += votes; leftMandates += mandates; }
 
                 const card = document.createElement('div');
                 card.className = 'card';
+                let mandateText = mandates > 0 ? `<p style="font-size: 1rem; color: #555; font-weight: normal; margin-top: 5px;">${mandates} mandat</p>` : '';
                 card.innerHTML = `
                     <h3 class="party-${name.replace(/ /g, '')}">${name}</h3>
                     <p>${formatNumber(votes)}</p>
+                    ${mandateText}
                 `;
                 partyListDiv.appendChild(card);
             });
 
-            // Visa blocksiffror
+            // Blockinfo
             document.getElementById('right-block-votes').innerText = formatNumber(rightSum);
             document.getElementById('left-block-votes').innerText = formatNumber(leftSum);
+            document.getElementById('right-block-mandates').innerText = rightMandates + ' mandat';
+            document.getElementById('left-block-mandates').innerText = leftMandates + ' mandat';
 
-            // Beräkna skillnad
             const diff = Math.abs(rightSum - leftSum);
+            const diffMandates = Math.abs(rightMandates - leftMandates);
             document.getElementById('diff-votes').innerText = formatNumber(diff) + ' röster';
             
             let diffText = "";
-            if (rightSum > leftSum) {
-                diffText = 'M+SD+KD+L leder.';
-            } else if (leftSum > rightSum) {
-                diffText = 'S+V+C+MP leder.';
-            } else {
-                diffText = 'Det är helt jämnt mellan blocken.';
+            if (rightMandates > leftMandates) { diffText = 'M+SD+KD+L leder med ' + diffMandates + ' mandat.'; } 
+            else if (leftMandates > rightMandates) { diffText = 'S+V+C+MP leder med ' + diffMandates + ' mandat.'; } 
+            else {
+                if (rightSum > leftSum) diffText = 'M+SD+KD+L leder (fler röster, samma antal mandat).';
+                else if (leftSum > rightSum) diffText = 'S+V+C+MP leder (fler röster, samma antal mandat).';
+                else diffText = 'Det är helt jämnt mellan blocken.';
             }
             document.getElementById('diff-text').innerText = diffText;
+
+            // RITA VISUALISERINGAR
+            drawVisualizations(parties);
         }
 
-        // Koppla knappen
-        document.getElementById('refresh-btn').addEventListener('click', fetchData);
+        function drawVisualizations(parties) {
+            // Sortera data vänster till höger baserat på predefined order
+            const orderedData = leftToRightOrder
+                .map(name => ({
+                    name: name,
+                    mandates: parties[name] ? parties[name].mandates : 0,
+                    colorStr: partyColors[name],
+                    hex: partyHexColors[name]
+                }))
+                .filter(p => p.mandates > 0);
 
-        // Hämta initialt när sidan laddas
+            const totalMandates = orderedData.reduce((sum, p) => sum + p.mandates, 0);
+
+            // 1. Rak mandatlinje (Stacked Bar)
+            const mandateBar = document.getElementById('mandate-bar');
+            mandateBar.innerHTML = '';
+            
+            orderedData.forEach(p => {
+                const percentage = (p.mandates / 349) * 100; // Vi delar alltid på 349 totala mandat
+                const segment = document.createElement('div');
+                segment.className = 'party-segment';
+                segment.style.width = percentage + '%';
+                segment.style.backgroundColor = p.colorStr;
+                segment.title = p.name + ': ' + p.mandates + ' mandat';
+                
+                // Visa bara text om segmentet är tillräckligt stort
+                if (percentage > 3) {
+                    // Kortnamn, första bokstäverna (t.ex. Vänsterpartiet -> V)
+                    let shortName = p.name;
+                    if(p.name === 'Socialdemokraterna') shortName = 'S';
+                    else if(p.name === 'Sverigedemokraterna') shortName = 'SD';
+                    else if(p.name === 'Miljöpartiet') shortName = 'MP';
+                    else if(p.name === 'Centerpartiet') shortName = 'C';
+                    else if(p.name === 'Kristdemokraterna') shortName = 'KD';
+                    else if(p.name === 'Moderaterna') shortName = 'M';
+                    else if(p.name === 'Liberalerna') shortName = 'L';
+                    else if(p.name === 'Vänsterpartiet') shortName = 'V';
+                    
+                    segment.innerText = shortName;
+                }
+                mandateBar.appendChild(segment);
+            });
+
+            // 2. Chart.js (Riksdagen Halvcirkel / Doughnut)
+            const ctx = document.getElementById('parliamentChart').getContext('2d');
+            
+            if (parliamentChartInstance) {
+                parliamentChartInstance.destroy();
+            }
+
+            const chartData = {
+                labels: orderedData.map(p => p.name),
+                datasets: [{
+                    data: orderedData.map(p => p.mandates),
+                    backgroundColor: orderedData.map(p => p.hex),
+                    borderWidth: 2,
+                    borderColor: '#f4f4f9' // Samma som sidans bakgrund för snyggt avstånd
+                }]
+            };
+
+            parliamentChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    circumference: 180,    // Halvcirkel
+                    rotation: -90,         // Starta från vänster
+                    cutout: '50%',         // Tjocklek
+                    plugins: {
+                        legend: {
+                            display: false // Vi döljer den vanliga legenden, baren och korten räcker
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ' ' + context.label + ': ' + context.raw + ' mandat';
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        animateRotate: true,
+                        animateScale: false
+                    }
+                }
+            });
+        }
+
+        document.getElementById('refresh-btn').addEventListener('click', fetchData);
         fetchData();
     </script>
 </body>
