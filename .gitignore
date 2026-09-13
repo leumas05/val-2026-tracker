@@ -1,0 +1,12 @@
+# Ignore node_modules
+node_modules/
+
+# Ignore scratch files and downloaded test files
+scratch/
+svt_page.html
+main.js
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
