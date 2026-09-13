@@ -86,11 +86,16 @@
         .card {
             background: var(--bg);
             border-radius: 8px;
-            padding: 15px;
+            padding: 15px 10px; /* Lite mindre horizontal padding för att ge texten plats */
             text-align: center;
         }
 
-        .card h3 { margin: 0 0 10px 0; font-size: 1.2rem; }
+        .card h3 { 
+            margin: 0 0 10px 0; 
+            font-size: 1.05rem; /* Mindre text för att få plats med Sverigedemokraterna */
+            word-break: break-word; /* Tillåt radbrytning om det kniper på små skärmar */
+            hyphens: auto;
+        }
         .card p { margin: 0; font-size: 1.5rem; font-weight: bold; }
 
         /* Block Cards */
