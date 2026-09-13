@@ -202,14 +202,6 @@
     </style>
 </head>
 <body>
-
-    <h1>Valresultat 2026</h1>
-    <div class="actions">
-        <button id="refresh-btn">Hämta ny data</button>
-    </div>
-    <div id="status">Hämtar och analyserar data från SVT...</div>
-
-    <div style="display: none;" id="content-area">
     <div class="container">
         <header>
             <div style="flex: 1;">
@@ -441,14 +433,11 @@
         }
 
         function fetchData(path = '') {
-            const btn = document.getElementById('refresh-btn');
-            const statusDiv = document.getElementById('status');
             const dataSec = document.getElementById('data-section');
             const loadingDiv = document.getElementById('loading');
+            const errorDiv = document.getElementById('error-message');
             
-            if (btn) { btn.disabled = true; btn.innerText = 'Laddar...'; }
-            statusDiv.style.display = 'block';
-            statusDiv.innerText = 'Hämtar och analyserar data från SVT...';
+            errorDiv.style.display = 'none';
             dataSec.style.display = 'none';
             loadingDiv.style.display = 'block';
 
@@ -497,6 +486,7 @@
                                     }
                                     
                                     parties[partyName] = { votes: votes, mandates: mandates, totalMandates: totalMandates };
+                                    console.log("Parsed party:", partyName, parties[partyName]);
                                     break;
                                 }
                                 parent = parent.parentElement;
@@ -505,16 +495,15 @@
                         }
                     });
 
+                    console.log("All parsed parties:", parties);
                     renderData(parties);
                 })
                 .catch(error => {
                     loadingDiv.style.display = 'none';
-                    statusDiv.innerText = 'Fel vid hämtning: ' + error.message;
-                    statusDiv.style.display = 'block';
+                    const errorDiv = document.getElementById('error-message');
+                    errorDiv.innerText = 'Fel vid hämtning: ' + error.message;
+                    errorDiv.style.display = 'block';
                     console.error(error);
-                })
-                .finally(() => {
-                    if (btn) { btn.disabled = false; btn.innerText = 'Hämta ny data'; }
                 });
         }
 
@@ -523,12 +512,13 @@
         }
 
         function renderData(parties) {
-            const statusDiv = document.getElementById('status');
+            const errorDiv = document.getElementById('error-message');
             if (Object.keys(parties).length === 0) {
-                statusDiv.innerText = 'Kunde inte hitta några röster i SVT:s data.';
+                errorDiv.innerText = 'Kunde inte hitta några röster i SVT:s data.';
+                errorDiv.style.display = 'block';
                 return;
             }
-            statusDiv.style.display = 'none';
+            errorDiv.style.display = 'none';
             document.getElementById('data-section').style.display = 'block';
 
             const rightParties = ['Moderaterna', 'Sverigedemokraterna', 'Kristdemokraterna', 'Liberalerna'];
