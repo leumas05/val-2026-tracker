@@ -493,8 +493,6 @@
                                     if (mandateMatch) {
                                         mandates = parseInt(mandateMatch[1], 10);
                                         totalMandates = parseInt(mandateMatch[2], 10);
-                                        // Uppdatera mandate-target texten i UI om den ändras (för kommuner)
-                                        document.getElementById('mandate-target').innerText = totalMandates + ' mandat';
                                     }
                                     
                                     parties[partyName] = { votes: votes, mandates: mandates, totalMandates: totalMandates };
@@ -617,8 +615,15 @@
             const mandateBar = document.getElementById('mandateBar');
             mandateBar.innerHTML = '';
             
-            // All parties share the same totalMandates in this context
-            const totalM = orderedData.length > 0 ? orderedData[0].totalMandates : 349;
+            // All parties share the same totalMandates in this context, but parties with 0 mandates might have defaulted to 349
+            let totalM = 349;
+            const validMandates = orderedData.filter(p => p.mandates > 0 && p.totalMandates > 0);
+            if (validMandates.length > 0) {
+                totalM = validMandates[0].totalMandates;
+            }
+            
+            // Uppdatera "175 mandat"-målet till hälften av totala mandaten för aktuell plats
+            document.getElementById('mandate-target').innerText = Math.ceil(totalM / 2) + ' mandat';
 
             orderedData.filter(p => p.mandates > 0).forEach(p => {
                 const percentage = (p.mandates / totalM) * 100;
