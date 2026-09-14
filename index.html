@@ -315,9 +315,9 @@
             <!-- Rak Linje för Mandatfördelning -->
             <div style="text-align: center; margin-top: 10px; margin-bottom: 20px; position: relative;">
                 <div style="display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 5px; font-size: 0.9rem; position: relative;">
-                    <span id="left-block-mandate-text" style="color: #bbb; z-index: 10;">Regering: 0 mandat</span>
-                    <span id="mandate-target" style="position: absolute; left: 50%; transform: translateX(-50%);">175 mandat</span>
                     <span id="right-block-mandate-text" style="color: #bbb; z-index: 10;">Opposition: 0 mandat</span>
+                    <span id="mandate-target" style="position: absolute; left: 50%; transform: translateX(-50%);">175 mandat</span>
+                    <span id="left-block-mandate-text" style="color: #bbb; z-index: 10;">Regering: 0 mandat</span>
                 </div>
                 <div style="text-align: center; font-size: 0.85rem; color: #999; margin-bottom: 5px;" id="mandate-total-text">Totalt 349 mandat</div>
                 <div class="middle-arrow" style="top: 25px;">↓</div>
@@ -327,9 +327,9 @@
             <!-- Rak Linje för Röstfördelning -->
             <div style="text-align: center; margin-bottom: 30px; position: relative;">
                 <div style="display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 5px; font-size: 0.9rem; position: relative;">
-                    <span id="left-block-slider-text" style="color: #bbb; z-index: 10;">Regering: 0%</span>
-                    <span style="position: absolute; left: 50%; transform: translateX(-50%);">Röstfördelning</span>
                     <span id="right-block-slider-text" style="color: #bbb; z-index: 10;">Opposition: 0%</span>
+                    <span style="position: absolute; left: 50%; transform: translateX(-50%);">R�stf�rdelning</span>
+                    <span id="left-block-slider-text" style="color: #bbb; z-index: 10;">Regering: 0%</span>
                 </div>
                 <div class="middle-arrow" style="top: 15px;">↓</div>
                 <div class="mandate-bar" id="votesBar"></div>
@@ -450,12 +450,12 @@
             <h2>Bygg din egna regering</h2>
             <p style="text-align: center; color: #bbb; margin-bottom: 20px;">Dra och släpp partierna mellan blocken för att se hur maktfördelningen förändras i realtid!</p>
             <div class="blocks-container">
-                <div class="block-card red" style="border-top-color: #3498db;">
-                    <h3 id="left-block-title">Regering</h3>
-                    <p id="left-block-votes">0</p>
-                    <small>röster</small>
-                    <p id="left-block-mandates" style="font-size: 1.2rem; color: #bbb; margin-top: 10px;">0 mandat</p>
-                    <div id="sortable-left" class="sortable-list" style="margin-top: 15px; min-height: 60px; background: #121212; padding: 10px; border-radius: 8px;"></div>
+                <div class="block-card blue" style="border-top-color: #e74c3c;">
+                    <h3 id="right-block-title">Opposition</h3>
+                    <p id="right-block-votes">0</p>
+                    <small>r�ster</small>
+                    <p id="right-block-mandates" style="font-size: 1.2rem; color: #bbb; margin-top: 10px;">0 mandat</p>
+                    <div id="sortable-right" class="sortable-list" style="margin-top: 15px; min-height: 60px; background: #121212; padding: 10px; border-radius: 8px;"></div>
                 </div>
 
                 <div class="block-card grey" style="border-top-color: #555; flex: 0.6; min-width: 150px;">
@@ -463,12 +463,12 @@
                     <div id="no-mandate-list" style="margin-top: 15px; min-height: 60px; background: #121212; padding: 10px; border-radius: 8px; display: flex; flex-direction: column; gap: 5px;"></div>
                 </div>
 
-                <div class="block-card blue" style="border-top-color: #e74c3c;">
-                    <h3 id="right-block-title">Opposition</h3>
-                    <p id="right-block-votes">0</p>
-                    <small>röster</small>
-                    <p id="right-block-mandates" style="font-size: 1.2rem; color: #bbb; margin-top: 10px;">0 mandat</p>
-                    <div id="sortable-right" class="sortable-list" style="margin-top: 15px; min-height: 60px; background: #121212; padding: 10px; border-radius: 8px;"></div>
+                <div class="block-card red" style="border-top-color: #3498db;">
+                    <h3 id="left-block-title">Regering</h3>
+                    <p id="left-block-votes">0</p>
+                    <small>r�ster</small>
+                    <p id="left-block-mandates" style="font-size: 1.2rem; color: #bbb; margin-top: 10px;">0 mandat</p>
+                    <div id="sortable-left" class="sortable-list" style="margin-top: 15px; min-height: 60px; background: #121212; padding: 10px; border-radius: 8px;"></div>
                 </div>
             </div>
 
@@ -964,7 +964,8 @@
             
             const middleParties = Object.keys(parties).filter(p => !leftParties.includes(p) && !rightParties.includes(p));
             
-            const leftToRightOrder = [...leftParties, ...middleParties, ...rightParties.slice().reverse()];
+            // Visualisering byts plats: Opposition till v�nster, Utan mandat mitten, Styrande till h�ger
+            const leftToRightOrder = [...rightParties, ...middleParties, ...leftParties.slice().reverse()];
 
             let totalVotes = 0;
             Object.values(parties).forEach(p => totalVotes += p.votes);
