@@ -207,6 +207,71 @@
         .party-Miljöpartiet { color: var(--color-MP); }
         .party-Liberalerna { color: var(--color-L); }
         
+        /* Custom Autocomplete Dropdown */
+        .autocomplete-container {
+            position: relative;
+            display: inline-block;
+        }
+        #lokal-sok {
+            padding: 10px 15px;
+            border-radius: 20px 0 0 20px;
+            border: 1px solid #ccc;
+            border-right: none;
+            width: 240px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        #lokal-sok:focus {
+            border-color: #3498db;
+        }
+        #search-btn {
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            border: 1px solid #3498db;
+            border-radius: 0 20px 20px 0;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.2s;
+            outline: none;
+        }
+        #search-btn:hover {
+            background: #2980b9;
+        }
+        #autocomplete-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 240px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            z-index: 1000;
+            max-height: 250px;
+            overflow-y: auto;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            list-style: none;
+            margin: 5px 0 0 0;
+            padding: 0;
+            text-align: left;
+            display: none;
+        }
+        #autocomplete-list li {
+            padding: 12px 15px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            border-bottom: 1px solid #f1f1f1;
+            color: #333;
+        }
+        #autocomplete-list li:last-child {
+            border-bottom: none;
+        }
+        #autocomplete-list li:hover, .autocomplete-active {
+            background-color: #f8f9fa;
+            color: #3498db;
+        }
+        
     </style>
 </head>
 <body>
@@ -219,11 +284,12 @@
             
             <div style="flex: 1; text-align: right;">
                 <!-- Enkelt sökfält som letar i datalistan nedan -->
-                <form id="search-form" onsubmit="handleSearch(event)" style="display:inline-block; position:relative;">
-                    <input type="text" id="lokal-sok" list="kommun-lista" placeholder="Sök kommun eller region..." style="padding: 10px; border-radius: 5px; border: 1px solid #ccc; width: 220px; font-size: 1rem;">
-                    <button type="submit" style="padding: 10px 15px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem;">Sök</button>
-                    <!-- Listan genereras dynamiskt av JavaScript nedan -->
-                    <datalist id="kommun-lista"></datalist>
+                <form id="search-form" onsubmit="handleSearch(event)" style="display:inline-block; margin: 0;">
+                    <div class="autocomplete-container">
+                        <input type="text" id="lokal-sok" autocomplete="off" placeholder="Sök kommun eller region...">
+                        <ul id="autocomplete-list"></ul>
+                    </div>
+                    <button type="submit" id="search-btn">Sök</button>
                 </form>
                 <div style="margin-top: 10px;">
                     <a href="#" onclick="history.pushState({}, '', '/'); handleRoute(); return false;" style="color: #3498db; text-decoration: none; font-size: 0.9rem;">Tillbaka till Riket (Hela Sverige)</a>
@@ -424,30 +490,113 @@
         const leftToRightOrder = ['Vänsterpartiet', 'Socialdemokraterna', 'Miljöpartiet', 'Centerpartiet', 'Övriga partier', 'Liberalerna', 'Moderaterna', 'Kristdemokraterna', 'Sverigedemokraterna'];
         let parliamentChartInstance = null;
 
-        // Fyll datalistan
+        // Förbered sök-data och Autocomplete
         window.addEventListener('DOMContentLoaded', () => {
-            const datalist = document.getElementById('kommun-lista');
-            if (datalist && typeof PLATS_MAP !== 'undefined') {
+            if (typeof PLATS_MAP !== 'undefined') {
                 window.SLUG_MAP = {};
+                window.SEARCH_OPTIONS = [];
                 Object.keys(PLATS_MAP).forEach(name => {
                     const svtPath = PLATS_MAP[name];
-                    
-                    // Ta bort riksdagsval-länkel från sökfältet eftersom de skapar dubbletter (t.ex. Blekinge län)
                     if (svtPath.includes('riksdagsval')) return;
                     
                     const prefix = svtPath.includes('kommunval') ? 'kommunval/' : 'regionval/';
                     const fullSlug = prefix + slugify(name);
-                    window.SLUG_MAP[fullSlug] = { name: name, svtPath: svtPath };
-
                     const capitalized = name.charAt(0).toUpperCase() + name.slice(1);
-                    const option = document.createElement('option');
-                    option.value = capitalized;
-                    datalist.appendChild(option);
+                    
+                    window.SLUG_MAP[fullSlug] = { name: name, svtPath: svtPath };
+                    window.SEARCH_OPTIONS.push({ name: name, capitalized: capitalized, fullSlug: fullSlug });
                 });
+                
+                // Sortera sök-alternativen alfabetiskt
+                window.SEARCH_OPTIONS.sort((a, b) => a.capitalized.localeCompare(b.capitalized));
+                
+                setupAutocomplete();
             }
             // Kör första fetchen baserat på URL-path
             handleRoute();
         });
+
+        function setupAutocomplete() {
+            const input = document.getElementById('lokal-sok');
+            const list = document.getElementById('autocomplete-list');
+            let currentFocus = -1;
+
+            input.addEventListener('input', function() {
+                const val = this.value;
+                closeAllLists();
+                if (!val) return false;
+                
+                currentFocus = -1;
+                list.style.display = 'block';
+                
+                const matches = window.SEARCH_OPTIONS.filter(opt => opt.name.includes(val.toLowerCase()));
+                
+                matches.forEach((match, index) => {
+                    const li = document.createElement('li');
+                    
+                    // Markera det som matchar med fetstil
+                    const startIndex = match.name.indexOf(val.toLowerCase());
+                    const before = match.capitalized.substring(0, startIndex);
+                    const matched = match.capitalized.substring(startIndex, startIndex + val.length);
+                    const after = match.capitalized.substring(startIndex + val.length);
+                    
+                    li.innerHTML = `${before}<strong>${matched}</strong>${after}`;
+                    
+                    li.addEventListener('click', function(e) {
+                        input.value = match.capitalized;
+                        closeAllLists();
+                        // Direkt sök
+                        history.pushState({}, '', '/' + match.fullSlug);
+                        handleRoute();
+                    });
+                    list.appendChild(li);
+                });
+            });
+
+            input.addEventListener('keydown', function(e) {
+                let x = list.getElementsByTagName('li');
+                if (e.keyCode === 40) { // Ner
+                    currentFocus++;
+                    addActive(x);
+                } else if (e.keyCode === 38) { // Upp
+                    currentFocus--;
+                    addActive(x);
+                } else if (e.keyCode === 13) { // Enter
+                    e.preventDefault();
+                    if (currentFocus > -1) {
+                        if (x) x[currentFocus].click();
+                    } else {
+                        document.getElementById('search-form').dispatchEvent(new Event('submit'));
+                    }
+                }
+            });
+
+            function addActive(x) {
+                if (!x) return false;
+                removeActive(x);
+                if (currentFocus >= x.length) currentFocus = 0;
+                if (currentFocus < 0) currentFocus = (x.length - 1);
+                x[currentFocus].classList.add('autocomplete-active');
+                x[currentFocus].scrollIntoView({ block: 'nearest' });
+            }
+
+            function removeActive(x) {
+                for (let i = 0; i < x.length; i++) {
+                    x[i].classList.remove('autocomplete-active');
+                }
+            }
+
+            function closeAllLists(elmnt) {
+                if (elmnt !== input) {
+                    list.style.display = 'none';
+                    list.innerHTML = '';
+                }
+            }
+
+            document.addEventListener('click', function (e) {
+                closeAllLists(e.target);
+            });
+        }
 
         function slugify(text) {
             return text.toString().toLowerCase().trim()
