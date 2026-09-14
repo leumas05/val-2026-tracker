@@ -220,13 +220,13 @@
             <div style="flex: 1; text-align: right;">
                 <!-- Enkelt sökfält som letar i datalistan nedan -->
                 <form id="search-form" onsubmit="handleSearch(event)" style="display:inline-block; position:relative;">
-                    <input type="text" id="lokal-sok" placeholder="Sök kommun eller region..." style="padding: 10px; border-radius: 5px; border: 1px solid #ccc; width: 220px; font-size: 1rem;">
+                    <input type="text" id="lokal-sok" list="kommun-lista" placeholder="Sök kommun eller region..." style="padding: 10px; border-radius: 5px; border: 1px solid #ccc; width: 220px; font-size: 1rem;">
                     <button type="submit" style="padding: 10px 15px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem;">Sök</button>
                     <!-- Listan genereras dynamiskt av JavaScript nedan -->
                     <datalist id="kommun-lista"></datalist>
                 </form>
                 <div style="margin-top: 10px;">
-                    <a href="#" onclick="window.location.hash=''; window.location.reload(); return false;" style="color: #3498db; text-decoration: none; font-size: 0.9rem;">Tillbaka till Riket (Hela Sverige)</a>
+                    <a href="#" onclick="history.pushState({}, '', '/'); handleRoute(); return false;" style="color: #3498db; text-decoration: none; font-size: 0.9rem;">Tillbaka till Riket (Hela Sverige)</a>
                 </div>
             </div>
         </header>
@@ -401,8 +401,8 @@
                     datalist.appendChild(option);
                 });
             }
-            // Kör första fetchen
-            handleHashChange();
+            // Kör första fetchen baserat på URL-path
+            handleRoute();
         });
 
         function slugify(text) {
@@ -413,30 +413,42 @@
 
         function handleSearch(event) {
             if (event) event.preventDefault();
-            const val = document.getElementById('lokal-sok').value.trim();
-            if (!val) window.location.hash = '';
-            else window.location.hash = val;
+            const val = document.getElementById('lokal-sok').value.trim().toLowerCase();
+            if (!val) {
+                history.pushState({}, '', '/');
+                handleRoute();
+            } else {
+                if (typeof PLATS_MAP !== 'undefined' && !PLATS_MAP[val]) {
+                    alert('Kunde inte hitta kommunen/regionen. Välj ett alternativ från listan!');
+                    return;
+                }
+                history.pushState({}, '', '/' + encodeURIComponent(val));
+                handleRoute();
+            }
         }
 
-        window.addEventListener('hashchange', handleHashChange);
+        window.addEventListener('popstate', handleRoute);
 
-        function handleHashChange() {
-            let hash = decodeURIComponent(window.location.hash.substring(1)).toLowerCase();
+        function handleRoute() {
+            let pathName = decodeURIComponent(window.location.pathname.substring(1)).toLowerCase();
+            // Ta bort eventuell avslutande slash
+            if (pathName.endsWith('/')) pathName = pathName.slice(0, -1);
+            
             let path = '';
             let titleText = 'Riket (Hela Sverige)';
 
-            if (hash && typeof PLATS_MAP !== 'undefined') {
-                const svtPath = PLATS_MAP[hash];
+            if (pathName && typeof PLATS_MAP !== 'undefined') {
+                const svtPath = PLATS_MAP[pathName];
                 if (svtPath) {
                     path = svtPath;
-                    titleText = hash.charAt(0).toUpperCase() + hash.slice(1);
+                    titleText = pathName.charAt(0).toUpperCase() + pathName.slice(1);
                     if (svtPath.includes('kommunval') && !titleText.toLowerCase().includes('kommun')) {
                         titleText += ' kommun';
                     }
                 } else {
-                    alert('Kunde inte hitta platsen. Kontrollera stavningen.');
-                    window.location.hash = '';
-                    return;
+                    // Om ogiltig URL (t.ex. /asdf), gå till riket
+                    history.replaceState({}, '', '/');
+                    pathName = '';
                 }
             }
 
