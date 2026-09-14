@@ -148,24 +148,32 @@
         }
 
         .mandate-bar {
-            display: flex;
             width: 100%;
-            height: 40px;
-            border-radius: 20px;
+            height: 35px;
+            background-color: #ddd;
+            border-radius: 4px;
             overflow: hidden;
-            background: #e0e0e0;
+            display: flex;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
         }
-
         .party-segment {
             height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 0.85rem;
             font-weight: bold;
-            overflow: hidden;
-            transition: width 0.5s ease;
+            font-size: 0.8rem;
+            transition: width 0.5s ease-in-out;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        .middle-arrow {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.2rem;
+            color: #333;
+            z-index: 10;
         }
 
         .center-line {
@@ -239,15 +247,19 @@
             <!-- Rak Linje för Mandatfördelning -->
             <div style="text-align: center; margin-top: 10px; margin-bottom: 20px; position: relative;">
                 <div style="font-weight: bold; margin-bottom: 5px; font-size: 0.9rem;" id="mandate-target">175 mandat</div>
+                <div class="middle-arrow" style="top: 15px;">▼</div>
                 <div class="mandate-bar" id="mandateBar"></div>
-                <div class="mandate-divider"></div>
             </div>
 
             <!-- Rak Linje för Röstfördelning -->
             <div style="text-align: center; margin-bottom: 30px; position: relative;">
-                <div style="font-weight: bold; margin-bottom: 5px; font-size: 0.9rem;">Röstfördelning (%)</div>
+                <div style="display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 5px; font-size: 0.9rem;">
+                    <span id="left-block-slider-text" style="color: #E8112d;">S+V+C+MP: 0%</span>
+                    <span>Röstfördelning</span>
+                    <span id="right-block-slider-text" style="color: #006AB3;">M+SD+KD+L: 0%</span>
+                </div>
+                <div class="middle-arrow" style="top: 15px;">▼</div>
                 <div class="mandate-bar" id="votesBar"></div>
-                <div class="mandate-divider"></div>
             </div>
 
             <div class="party-grid" id="parties">
@@ -374,7 +386,7 @@
             'Centerpartiet': '#009933', 'Liberalerna': '#006AB3', 'Moderaterna': '#52BDEC',
             'Kristdemokraterna': '#000077', 'Sverigedemokraterna': '#DDDD00', 'Övriga partier': '#AAAAAA'
         };
-        const leftToRightOrder = ['Vänsterpartiet', 'Socialdemokraterna', 'Miljöpartiet', 'Centerpartiet', 'Liberalerna', 'Moderaterna', 'Kristdemokraterna', 'Sverigedemokraterna', 'Övriga partier'];
+        const leftToRightOrder = ['Vänsterpartiet', 'Socialdemokraterna', 'Miljöpartiet', 'Centerpartiet', 'Övriga partier', 'Liberalerna', 'Moderaterna', 'Kristdemokraterna', 'Sverigedemokraterna'];
         let parliamentChartInstance = null;
 
         // Fyll datalistan
@@ -563,6 +575,10 @@
             document.getElementById('left-block-votes').innerHTML = `${formatNumber(leftSum)} <span style="font-size: 0.8em; color: #777;">(${leftPercent})</span>`;
             document.getElementById('right-block-mandates').innerText = rightMandates + ' mandat';
             document.getElementById('left-block-mandates').innerText = leftMandates + ' mandat';
+
+            // Uppdatera texterna över Röstfördelnings-slidern
+            document.getElementById('left-block-slider-text').innerText = 'S+V+C+MP: ' + leftPercent;
+            document.getElementById('right-block-slider-text').innerText = 'M+SD+KD+L: ' + rightPercent;
 
             const diff = Math.abs(rightSum - leftSum);
             const diffMandates = Math.abs(rightMandates - leftMandates);
