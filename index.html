@@ -278,23 +278,23 @@
 </head>
 <body>
     <div class="container">
-        <header style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 15px;">
-            <div style="flex: 1;">
-                <h1 id="page-title">Val 2026: Riksdagen</h1>
-                <p>Liveresultat direkt från SVT</p>
-            </div>
-            
-            <div style="flex: 1; text-align: right;">
-                <!-- Enkelt sökfält som letar i datalistan nedan -->
-                <form id="search-form" onsubmit="handleSearch(event)" style="display:inline-block; margin: 0;">
-                    <div class="autocomplete-container">
-                        <input type="text" id="lokal-sok" autocomplete="off" placeholder="Sök kommun eller region...">
-                        <ul id="autocomplete-list"></ul>
+        <header style="margin-bottom: 20px;">
+            <h1 id="page-title" style="margin-bottom: 10px;">Val 2026: Riksdagen</h1>
+            <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 15px;">
+                <p style="margin: 0;">Liveresultat direkt från SVT</p>
+                
+                <div style="text-align: right;">
+                    <!-- Enkelt sökfält som letar i datalistan nedan -->
+                    <form id="search-form" onsubmit="handleSearch(event)" style="display:inline-block; margin: 0;">
+                        <div class="autocomplete-container">
+                            <input type="text" id="lokal-sok" autocomplete="off" placeholder="Sök kommun eller region...">
+                            <ul id="autocomplete-list"></ul>
+                        </div>
+                        <button type="submit" id="search-btn">Sök</button>
+                    </form>
+                    <div id="back-to-riket-container" style="margin-top: 10px;">
+                        <a href="#" onclick="history.pushState({}, '', '/'); handleRoute(); return false;" style="color: #3498db; text-decoration: none; font-size: 0.9rem;">Tillbaka till Riket (Hela Sverige)</a>
                     </div>
-                    <button type="submit" id="search-btn">Sök</button>
-                </form>
-                <div id="back-to-riket-container" style="margin-top: 10px;">
-                    <a href="#" onclick="history.pushState({}, '', '/'); handleRoute(); return false;" style="color: #3498db; text-decoration: none; font-size: 0.9rem;">Tillbaka till Riket (Hela Sverige)</a>
                 </div>
             </div>
         </header>
