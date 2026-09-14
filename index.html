@@ -359,7 +359,7 @@
         
 
         <div class="section">
-            <h2>Bygg din egna regering</h2>
+            <h2 id="build-government-title">Bygg din egna regering</h2>
             <p style="text-align: center; color: #bbb; margin-bottom: 20px;">Dra och släpp partierna mellan blocken för att se hur maktfördelningen förändras i realtid!</p>
             <div class="blocks-container">
                 <div class="block-card blue" style="border-top-color: #e74c3c;">
@@ -852,6 +852,13 @@
 
         function renderData(parties) {
             window.APP_PARTIES = parties;
+            
+            // Uppdatera rubriken "Bygg din egna regering/regionstyrelse/kommunstyrelse"
+            const buildTitleEl = document.getElementById('build-government-title');
+            if (buildTitleEl) {
+                buildTitleEl.innerText = 'Bygg din egna ' + getLeftTitle().toLowerCase();
+            }
+
             const errorDiv = document.getElementById('error-message');
             if (Object.keys(parties).length === 0) {
                 errorDiv.innerText = 'Kunde inte hitta några röster i SVT:s data.';
