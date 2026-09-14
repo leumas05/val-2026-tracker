@@ -314,22 +314,24 @@
             
             <!-- Rak Linje för Mandatfördelning -->
             <div style="text-align: center; margin-top: 10px; margin-bottom: 20px; position: relative;">
-                <div style="display: flex; justify-content: center; align-items: baseline; margin-bottom: 5px; position: relative;">
-                    <div style="position: absolute; left: 0; font-size: 0.85rem; color: #bbb; font-weight: normal;" id="mandate-total-text">Totalt 349 mandat</div>
-                    <div style="font-weight: bold; font-size: 0.9rem;" id="mandate-target">175 mandat</div>
+                <div style="display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 5px; font-size: 0.9rem; position: relative;">
+                    <span id="left-block-mandate-text" style="color: #bbb; z-index: 10;">Regering: 0 mandat</span>
+                    <span id="mandate-target" style="position: absolute; left: 50%; transform: translateX(-50%);">175 mandat</span>
+                    <span id="right-block-mandate-text" style="color: #bbb; z-index: 10;">Opposition: 0 mandat</span>
                 </div>
-                <div class="middle-arrow" style="top: 15px;">▼</div>
+                <div style="text-align: center; font-size: 0.85rem; color: #999; margin-bottom: 5px;" id="mandate-total-text">Totalt 349 mandat</div>
+                <div class="middle-arrow" style="top: 25px;">↓</div>
                 <div class="mandate-bar" id="mandateBar"></div>
             </div>
 
             <!-- Rak Linje för Röstfördelning -->
             <div style="text-align: center; margin-bottom: 30px; position: relative;">
-                <div style="display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 5px; font-size: 0.9rem;">
-                    <span id="left-block-slider-text" style="color: #E8112d;">S+V+C+MP: 0%</span>
-                    <span>Röstfördelning</span>
-                    <span id="right-block-slider-text" style="color: #006AB3;">M+SD+KD+L: 0%</span>
+                <div style="display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 5px; font-size: 0.9rem; position: relative;">
+                    <span id="left-block-slider-text" style="color: #bbb; z-index: 10;">Regering: 0%</span>
+                    <span style="position: absolute; left: 50%; transform: translateX(-50%);">Röstfördelning</span>
+                    <span id="right-block-slider-text" style="color: #bbb; z-index: 10;">Opposition: 0%</span>
                 </div>
-                <div class="middle-arrow" style="top: 15px;">▼</div>
+                <div class="middle-arrow" style="top: 15px;">↓</div>
                 <div class="mandate-bar" id="votesBar"></div>
             </div>
 
@@ -471,7 +473,7 @@
             </div>
 
             <div class="diff-card">
-                <h3>Skillnad mellan Regering och Opposition</h3>
+                <h3 id="diff-title">Skillnad mellan Regering och Opposition</h3>
                 <p id="diff-votes">0</p>
                 <p style="font-size: 1.2rem; margin-top: 5px; font-weight: normal;" id="diff-text"></p>
             </div>
@@ -673,6 +675,12 @@
         }
 
         function fetchData(path = '') {
+            if (path.includes('kommunval')) window.APP_LEVEL = 'kommun';
+            else if (path.includes('regionval')) window.APP_LEVEL = 'region';
+            else window.APP_LEVEL = 'riksdag';
+            if (path.includes('kommunval')) window.APP_LEVEL = 'kommun';
+            else if (path.includes('regionval')) window.APP_LEVEL = 'region';
+            else window.APP_LEVEL = 'riksdag';
             const dataSec = document.getElementById('data-section');
             const loadingDiv = document.getElementById('loading');
             const errorDiv = document.getElementById('error-message');
@@ -883,6 +891,12 @@
             }
 
             updateBlockStats();
+        }
+
+        function getLeftTitle() {
+            if (window.APP_LEVEL === 'kommun') return 'Kommunstyrelse';
+            if (window.APP_LEVEL === 'region') return 'Regionstyrelse';
+            return 'Regering';
         }
 
         function updateBlockStats() {
