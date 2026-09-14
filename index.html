@@ -736,13 +736,26 @@
                                 
                                 let mandates = 0;
                                 let totalMandates = 349;
-                                
                                 if (mandateMatch) {
                                     mandates = parseInt(mandateMatch[1], 10);
                                     totalMandates = parseInt(mandateMatch[2], 10);
                                 }
                                 
-                                parties[partyName] = { votes: votes, mandates: mandates, totalMandates: totalMandates };
+                                // Försök hitta förkortningen i HTML
+                                let abbr = null;
+                                let searchParent = el.parentElement;
+                                let attempts = 5;
+                                while(searchParent && attempts > 0) {
+                                    const symbolEl = searchParent.querySelector('.symbol');
+                                    if (symbolEl) {
+                                        abbr = symbolEl.textContent.trim();
+                                        break;
+                                    }
+                                    searchParent = searchParent.parentElement;
+                                    attempts--;
+                                }
+                                
+                                parties[partyName] = { votes: votes, mandates: mandates, totalMandates: totalMandates, abbr: abbr };
                                 break;
                             }
                             parent = parent.parentElement;
@@ -767,6 +780,9 @@
         }
 
         function getShortName(p) {
+            if (window.APP_PARTIES && window.APP_PARTIES[p] && window.APP_PARTIES[p].abbr) {
+                return window.APP_PARTIES[p].abbr;
+            }
             let shortName = p;
             if(p === 'Socialdemokraterna') shortName = 'S';
             else if(p === 'Sverigedemokraterna') shortName = 'SD';
