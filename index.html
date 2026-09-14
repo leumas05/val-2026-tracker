@@ -10,9 +10,9 @@
 
     <style>
         :root {
-            --bg: #f4f4f9;
-            --text: #333;
-            --card-bg: #fff;
+            --bg: #121212;
+            --text: #e0e0e0;
+            --card-bg: #1e1e1e;
             --red-block: #e74c3c;
             --blue-block: #3498db;
             --diff: #9b59b6;
@@ -64,7 +64,7 @@
         #status {
             text-align: center;
             font-style: italic;
-            color: #666;
+            color: #aaa;
             margin-bottom: 20px;
         }
 
@@ -72,7 +72,7 @@
             background: var(--card-bg);
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.5);
             margin-bottom: 30px;
         }
 
@@ -150,7 +150,7 @@
         .mandate-bar {
             width: 100%;
             height: 35px;
-            background-color: #ddd;
+            background-color: #333;
             border-radius: 4px;
             overflow: hidden;
             display: flex;
@@ -172,7 +172,7 @@
             left: 50%;
             transform: translateX(-50%);
             font-size: 1.2rem;
-            color: #333;
+            color: #e0e0e0;
             z-index: 10;
         }
 
@@ -182,7 +182,7 @@
             bottom: -15px;
             left: 50%;
             width: 2px;
-            background: #2c3e50;
+            background: #e0e0e0;
             z-index: 10;
         }
 
@@ -194,7 +194,7 @@
             text-align: center;
             font-size: 0.9rem;
             font-weight: bold;
-            color: #2c3e50;
+            color: #e0e0e0;
         }
 
         /* Party Text Colors */
@@ -212,10 +212,9 @@
             position: relative;
             display: inline-block;
         }
-        #lokal-sok {
-            padding: 10px 15px;
+        #lokal-sok { background: #1e1e1e; color: #e0e0e0; padding: 10px 15px;
             border-radius: 20px 0 0 20px;
-            border: 1px solid #ccc;
+            border: 1px solid #444;
             border-right: none;
             width: 240px;
             font-size: 1rem;
@@ -244,8 +243,8 @@
             top: 100%;
             left: 0;
             width: 240px;
-            background: #fff;
-            border: 1px solid #ddd;
+            background: #1e1e1e;
+            border: 1px solid #444;
             border-radius: 8px;
             z-index: 1000;
             max-height: 250px;
@@ -261,14 +260,14 @@
             padding: 12px 15px;
             cursor: pointer;
             font-size: 0.95rem;
-            border-bottom: 1px solid #f1f1f1;
-            color: #333;
+            border-bottom: 1px solid #333;
+            color: #e0e0e0;
         }
         #autocomplete-list li:last-child {
             border-bottom: none;
         }
         #autocomplete-list li:hover, .autocomplete-active {
-            background-color: #f8f9fa;
+            background-color: #2c2c2c;
             color: #3498db;
         }
         
@@ -303,7 +302,7 @@
 
         <div class="section" id="data-section" style="display: none;">
             <h2>Resultat</h2>
-            <p id="result-total-mandates" style="text-align: center; color: #555; margin-top: -10px; margin-bottom: 20px;"></p>
+            <p id="result-total-mandates" style="text-align: center; color: #bbb; margin-top: -10px; margin-bottom: 20px;"></p>
             <div id="error-message" style="color: red; text-align: center; display: none;"></div>
             <!-- Rest of code is unchanged below... -->
             
@@ -314,7 +313,7 @@
             <!-- Rak Linje för Mandatfördelning -->
             <div style="text-align: center; margin-top: 10px; margin-bottom: 20px; position: relative;">
                 <div style="display: flex; justify-content: center; align-items: baseline; margin-bottom: 5px; position: relative;">
-                    <div style="position: absolute; left: 0; font-size: 0.85rem; color: #555; font-weight: normal;" id="mandate-total-text">Totalt 349 mandat</div>
+                    <div style="position: absolute; left: 0; font-size: 0.85rem; color: #bbb; font-weight: normal;" id="mandate-total-text">Totalt 349 mandat</div>
                     <div style="font-weight: bold; font-size: 0.9rem;" id="mandate-target">175 mandat</div>
                 </div>
                 <div class="middle-arrow" style="top: 15px;">▼</div>
@@ -339,7 +338,7 @@
 
         <div class="section" id="map-section" style="min-height: 800px;">
             <h2>Interaktiv Karta</h2>
-            <p style="text-align: center; margin-bottom: 15px; color: #555;">Utforska valdistrikt, kommuner och regioner direkt i SVT:s egna kartverktyg. Sök efter din ort!</p>
+            <p style="text-align: center; margin-bottom: 15px; color: #bbb;">Utforska valdistrikt, kommuner och regioner direkt i SVT:s egna kartverktyg. Sök efter din ort!</p>
             
             <button id="toggle-map-btn" class="expand-map-btn" onclick="toggleMapModal()" style="display: none;">Förstora kartan ⤢</button>
             
@@ -390,16 +389,16 @@
                 .expand-map-btn {
                     display: block;
                     margin: 0 auto 15px auto;
-                    background-color: #2c3e50;
+                    background-color: #e0e0e0;
                 }
                 .load-map-btn {
                     display: block;
                     width: 100%;
                     padding: 30px;
-                    background: #f8f9fa;
-                    border: 2px dashed #ccc;
+                    background: #2c2c2c;
+                    border: 2px dashed #555;
                     border-radius: 8px;
-                    color: #2c3e50;
+                    color: #e0e0e0;
                     font-size: 1.1rem;
                     cursor: pointer;
                     margin-bottom: 20px;
@@ -407,8 +406,8 @@
                     text-align: center;
                 }
                 .load-map-btn:hover {
-                    background: #e9ecef;
-                    border-color: #aaa;
+                    background: #333;
+                    border-color: #666;
                 }
             </style>
 
@@ -416,10 +415,10 @@
 
             <button id="load-map-btn" class="load-map-btn" onclick="loadMap()">
                 🌍 <strong>Klicka här för att hämta kartan från SVT</strong>
-                <div style="font-size: 0.9rem; margin-top: 8px; color: #777;">(Laddas separat för att undvika att sidan hoppar, och för att spara dig från cookies tills du faktiskt behöver kartan)</div>
+                <div style="font-size: 0.9rem; margin-top: 8px; color: #999;">(Laddas separat för att undvika att sidan hoppar, och för att spara dig från cookies tills du faktiskt behöver kartan)</div>
             </button>
 
-            <div id="map-wrapper" style="display: none; position: relative; width: 100%; height: 750px; border-radius: 8px; overflow: hidden; box-shadow: inset 0 0 10px rgba(0,0,0,0.1); background: #fff;">
+            <div id="map-wrapper" style="display: none; position: relative; width: 100%; height: 750px; border-radius: 8px; overflow: hidden; box-shadow: inset 0 0 10px rgba(0,0,0,0.1); background: #1e1e1e;">
                 <iframe id="svt-map-iframe" src="" style="width: 100%; height: 100%; border: none;" scrolling="no" allowfullscreen></iframe>
             </div>
 
@@ -450,13 +449,13 @@
                     <h3>S + V + C + MP</h3>
                     <p id="left-block-votes">0</p>
                     <small>röster</small>
-                    <p id="left-block-mandates" style="font-size: 1.2rem; color: #555; margin-top: 10px;">0 mandat</p>
+                    <p id="left-block-mandates" style="font-size: 1.2rem; color: #bbb; margin-top: 10px;">0 mandat</p>
                 </div>
                 <div class="block-card blue">
                     <h3>M + SD + KD + L</h3>
                     <p id="right-block-votes">0</p>
                     <small>röster</small>
-                    <p id="right-block-mandates" style="font-size: 1.2rem; color: #555; margin-top: 10px;">0 mandat</p>
+                    <p id="right-block-mandates" style="font-size: 1.2rem; color: #bbb; margin-top: 10px;">0 mandat</p>
                 </div>
             </div>
 
@@ -783,10 +782,10 @@
 
                 const card = document.createElement('div');
                 card.className = 'card';
-                let mandateText = mandates > 0 ? `<p style="font-size: 1rem; color: #555; font-weight: normal; margin-top: 5px;">${mandates} mandat</p>` : '';
+                let mandateText = mandates > 0 ? `<p style="font-size: 1rem; color: #bbb; font-weight: normal; margin-top: 5px;">${mandates} mandat</p>` : '';
                 card.innerHTML = `
                     <h3 style="color: ${partyColors[name]}">${name}</h3>
-                    <p>${formatNumber(votes)} <span style="font-size: 0.9em; color: #777;">(${percent})</span></p>
+                    <p>${formatNumber(votes)} <span style="font-size: 0.9em; color: #999;">(${percent})</span></p>
                     ${mandateText}
                 `;
                 partyListDiv.appendChild(card);
@@ -796,8 +795,8 @@
             const rightPercent = ((rightSum / totalVotes) * 100).toFixed(1) + '%';
             const leftPercent = ((leftSum / totalVotes) * 100).toFixed(1) + '%';
             
-            document.getElementById('right-block-votes').innerHTML = `${formatNumber(rightSum)} <span style="font-size: 0.8em; color: #777;">(${rightPercent})</span>`;
-            document.getElementById('left-block-votes').innerHTML = `${formatNumber(leftSum)} <span style="font-size: 0.8em; color: #777;">(${leftPercent})</span>`;
+            document.getElementById('right-block-votes').innerHTML = `${formatNumber(rightSum)} <span style="font-size: 0.8em; color: #999;">(${rightPercent})</span>`;
+            document.getElementById('left-block-votes').innerHTML = `${formatNumber(leftSum)} <span style="font-size: 0.8em; color: #999;">(${leftPercent})</span>`;
             document.getElementById('right-block-mandates').innerText = rightMandates + ' mandat';
             document.getElementById('left-block-mandates').innerText = leftMandates + ' mandat';
 
@@ -923,7 +922,7 @@
                     data: chartDataArray.map(p => p.mandates),
                     backgroundColor: chartDataArray.map(p => p.hex),
                     borderWidth: 2,
-                    borderColor: '#fff'
+                    borderColor: '#1e1e1e'
                 }]
             };
 
