@@ -277,6 +277,13 @@
     </style>
 </head>
 <body>
+    <div id="custom-alert-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(2px);">
+        <div style="background: #1e1e1e; border-top: 5px solid #e74c3c; padding: 25px; border-radius: 8px; width: 90%; max-width: 400px; box-shadow: 0 15px 50px rgba(0,0,0,0.5); text-align: center;">
+            <h3 style="margin-top: 0; color: #e74c3c; font-size: 1.4rem;">Felaktig sökning</h3>
+            <p style="color: #bbb; margin: 15px 0 25px 0; font-size: 1rem;">Kunde inte hitta kommunen/regionen. Välj ett alternativ från listan!</p>
+            <button onclick="document.getElementById('custom-alert-modal').style.display = 'none';" style="background: #e74c3c; color: white; border: none; padding: 10px 25px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 1rem;">OK</button>
+        </div>
+    </div>
     <div class="container">
         <header style="margin-bottom: 20px;">
             <h1 id="page-title" style="margin-bottom: 10px;">Val 2026: Riksdagen</h1>
@@ -653,7 +660,7 @@
                 }
                 
                 if (!foundSlug) {
-                    alert('Kunde inte hitta kommunen/regionen. Välj ett alternativ från listan!');
+                    document.getElementById('custom-alert-modal').style.display = 'flex';
                     return;
                 }
                 history.pushState({}, '', foundSlug);
