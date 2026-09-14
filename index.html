@@ -430,6 +430,10 @@
                 window.SLUG_MAP = {};
                 Object.keys(PLATS_MAP).forEach(name => {
                     const svtPath = PLATS_MAP[name];
+                    
+                    // Ta bort riksdagsval-länkel från sökfältet eftersom de skapar dubbletter (t.ex. Blekinge län)
+                    if (svtPath.includes('riksdagsval')) return;
+                    
                     const prefix = svtPath.includes('kommunval') ? 'kommunval/' : 'regionval/';
                     const fullSlug = prefix + slugify(name);
                     window.SLUG_MAP[fullSlug] = { name: name, svtPath: svtPath };
@@ -457,13 +461,21 @@
                 history.pushState({}, '', '/');
                 handleRoute();
             } else {
-                if (typeof PLATS_MAP !== 'undefined' && !PLATS_MAP[val]) {
+                let foundSlug = null;
+                if (window.SLUG_MAP) {
+                    for (const [slug, data] of Object.entries(window.SLUG_MAP)) {
+                        if (data.name === val) {
+                            foundSlug = '/' + slug;
+                            break;
+                        }
+                    }
+                }
+                
+                if (!foundSlug) {
                     alert('Kunde inte hitta kommunen/regionen. Välj ett alternativ från listan!');
                     return;
                 }
-                const svtPath = PLATS_MAP[val];
-                const prefix = svtPath.includes('kommunval') ? '/kommunval/' : '/regionval/';
-                history.pushState({}, '', prefix + slugify(val));
+                history.pushState({}, '', foundSlug);
                 handleRoute();
             }
         }
