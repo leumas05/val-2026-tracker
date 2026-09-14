@@ -314,6 +314,7 @@
             <button onclick="scrollToMapAndLoad()" style="position: absolute; top: 15px; left: 15px; font-size: 0.9rem; padding: 6px 12px; background: #3498db; border: none; border-radius: 4px; color: white; cursor: pointer; display: flex; align-items: center; gap: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">🗺️ Karta 👇</button>
             <h2 id="result-title">Resultat</h2>
             <p id="result-total-mandates" style="text-align: center; color: #bbb; margin-top: -10px; margin-bottom: 20px;"></p>
+            <p id="result-invalid-votes" style="text-align: center; color: #e74c3c; font-size: 0.9rem; margin-top: -15px; margin-bottom: 25px; display: none;"></p>
             <div id="error-message" style="color: red; text-align: center; display: none;"></div>
             <!-- Rest of code is unchanged below... -->
             
@@ -730,6 +731,27 @@
                     
                     const tempDiv = document.createElement('div');
                     tempDiv.innerHTML = html;
+
+                    const invalidVotesP = document.getElementById('result-invalid-votes');
+                    invalidVotesP.style.display = 'none';
+                    invalidVotesP.innerText = '';
+                    const nonValidItem = tempDiv.querySelector('.stats-item--non-valid');
+                    if (nonValidItem) {
+                        const ogVal = nonValidItem.querySelector('.stats-value');
+                        if (ogVal) {
+                            const ogStr = ogVal.textContent.replace(/[^\d]/g, '');
+                            const ogNum = parseInt(ogStr, 10);
+                            let text = formatNumber(ogNum) + ' ogiltiga röster';
+                            const blankVal = nonValidItem.querySelector('strong');
+                            if (blankVal) {
+                                const blankStr = blankVal.textContent.replace(/[^\d]/g, '');
+                                const blankNum = parseInt(blankStr, 10);
+                                text += ' (varav ' + formatNumber(blankNum) + ' blanka)';
+                            }
+                            invalidVotesP.innerText = text;
+                            invalidVotesP.style.display = 'block';
+                        }
+                    }
 
                     const parties = {};
                     const partyElements = tempDiv.querySelectorAll('.party-text');
