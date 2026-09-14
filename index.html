@@ -237,6 +237,7 @@
 
         <div class="section" id="data-section" style="display: none;">
             <h2>Resultat</h2>
+            <p id="result-total-mandates" style="text-align: center; color: #555; margin-top: -10px; margin-bottom: 20px;"></p>
             <div id="error-message" style="color: red; text-align: center; display: none;"></div>
             <!-- Rest of code is unchanged below... -->
             
@@ -699,6 +700,7 @@
             // Uppdatera "175 mandat"-målet till hälften av totala mandaten för aktuell plats
             document.getElementById('mandate-target').innerText = Math.ceil(totalM / 2) + ' mandat';
             document.getElementById('mandate-total-text').innerText = 'Totalt ' + totalM + ' mandat';
+            document.getElementById('result-total-mandates').innerText = 'Totalt ' + totalM + ' mandat';
 
             orderedData.filter(p => p.mandates > 0).forEach(p => {
                 const percentage = (p.mandates / totalM) * 100;
