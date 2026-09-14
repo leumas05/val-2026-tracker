@@ -459,7 +459,7 @@
                 <div class="block-card blue" style="border-top-color: #e74c3c;">
                     <h3 id="right-block-title">Opposition</h3>
                     <p id="right-block-votes">0</p>
-                    <small>r�ster</small>
+                    <small>röster</small>
                     <p id="right-block-mandates" style="font-size: 1.2rem; color: #bbb; margin-top: 10px;">0 mandat</p>
                     <div id="sortable-right" class="sortable-list" style="margin-top: 15px; min-height: 60px; background: #121212; padding: 10px; border-radius: 8px;"></div>
                 </div>
@@ -472,7 +472,7 @@
                 <div class="block-card red" style="border-top-color: #3498db;">
                     <h3 id="left-block-title">Regering</h3>
                     <p id="left-block-votes">0</p>
-                    <small>r�ster</small>
+                    <small>röster</small>
                     <p id="left-block-mandates" style="font-size: 1.2rem; color: #bbb; margin-top: 10px;">0 mandat</p>
                     <div id="sortable-left" class="sortable-list" style="margin-top: 15px; min-height: 60px; background: #121212; padding: 10px; border-radius: 8px;"></div>
                 </div>
@@ -498,14 +498,14 @@
             'Moderaterna': '#52BDEC',
             'Kristdemokraterna': '#000077',
             'Sverigedemokraterna': '#DDDD00',
-            'Ö�vriga partier': '#AAAAAA'
+            'Övriga partier': '#AAAAAA'
         };
         const partyHexColors = {
             'Vänsterpartiet': '#DA291C', 'Socialdemokraterna': '#E8112d', 'Miljöpartiet': '#83CF39',
             'Centerpartiet': '#009933', 'Liberalerna': '#006AB3', 'Moderaterna': '#52BDEC',
-            'Kristdemokraterna': '#000077', 'Sverigedemokraterna': '#DDDD00', 'Ö�vriga partier': '#AAAAAA'
+            'Kristdemokraterna': '#000077', 'Sverigedemokraterna': '#DDDD00', 'Övriga partier': '#AAAAAA'
         };
-        const leftToRightOrder = ['Vänsterpartiet', 'Socialdemokraterna', 'Miljöpartiet', 'Centerpartiet', 'Ö�vriga partier', 'Liberalerna', 'Moderaterna', 'Kristdemokraterna', 'Sverigedemokraterna'];
+        const leftToRightOrder = ['Vänsterpartiet', 'Socialdemokraterna', 'Miljöpartiet', 'Centerpartiet', 'Övriga partier', 'Liberalerna', 'Moderaterna', 'Kristdemokraterna', 'Sverigedemokraterna'];
         let parliamentChartInstance = null;
 
         // Förbered sök-data och Autocomplete
@@ -798,7 +798,7 @@
             else if(p === 'Moderaterna') shortName = 'M';
             else if(p === 'Liberalerna') shortName = 'L';
             else if(p === 'Vänsterpartiet') shortName = 'V';
-            else if(p === 'Ö�vriga partier') shortName = 'ÖVR';
+            else if(p === 'Övriga partier') shortName = 'ÖVR';
             else if(shortName.length > 5) shortName = shortName.substring(0, 3).toUpperCase();
             return shortName;
         }
@@ -810,7 +810,7 @@
             window.APP_PARTIES = parties;
             const errorDiv = document.getElementById('error-message');
             if (Object.keys(parties).length === 0) {
-                errorDiv.innerText = 'Kunde inte hitta n�gra r�ster i SVT:s data.';
+                errorDiv.innerText = 'Kunde inte hitta några röster i SVT:s data.';
                 errorDiv.style.display = 'block';
                 return;
             }
@@ -861,9 +861,11 @@
             const leftDefaults = ['Moderaterna', 'Sverigedemokraterna', 'Liberalerna', 'Kristdemokraterna'];
             
             Object.keys(parties).forEach(p => {
-                if (p === 'Ö�vriga partier' || p === 'Övrigt') return; // Skapa aldrig piller för Ö�vriga partier
+                if (p.toLowerCase().includes('övrig')) return; // Skapa aldrig piller för Övriga partier
                 
                 const data = parties[p];
+                if (data.votes === 0) return; // Ignorera partier med 0 röster helt
+                
                 let pill = document.querySelector(`.party-drag-item[data-party="${p}"]`);
                 
                 if (!pill) {
@@ -986,7 +988,7 @@
             
             const middleParties = Object.keys(parties).filter(p => !leftParties.includes(p) && !rightParties.includes(p));
             
-            // Visualisering byts plats: Opposition till v�nster, Utan mandat mitten, Styrande till h�ger
+            // Visualisering byts plats: Opposition till vnster, Utan mandat mitten, Styrande till hger
             const leftToRightOrder = [...rightParties, ...middleParties, ...leftParties.slice().reverse()];
 
             let totalVotes = 0;
