@@ -393,8 +393,13 @@
         window.addEventListener('DOMContentLoaded', () => {
             const datalist = document.getElementById('kommun-lista');
             if (datalist && typeof PLATS_MAP !== 'undefined') {
+                window.SLUG_MAP = {};
                 Object.keys(PLATS_MAP).forEach(name => {
-                    // Snygga till namnet med stor bokstav
+                    const svtPath = PLATS_MAP[name];
+                    const prefix = svtPath.includes('kommunval') ? 'kommunval/' : 'regionval/';
+                    const fullSlug = prefix + slugify(name);
+                    window.SLUG_MAP[fullSlug] = { name: name, svtPath: svtPath };
+
                     const capitalized = name.charAt(0).toUpperCase() + name.slice(1);
                     const option = document.createElement('option');
                     option.value = capitalized;
@@ -422,7 +427,9 @@
                     alert('Kunde inte hitta kommunen/regionen. Välj ett alternativ från listan!');
                     return;
                 }
-                history.pushState({}, '', '/' + encodeURIComponent(val));
+                const svtPath = PLATS_MAP[val];
+                const prefix = svtPath.includes('kommunval') ? '/kommunval/' : '/regionval/';
+                history.pushState({}, '', prefix + slugify(val));
                 handleRoute();
             }
         }
@@ -437,12 +444,12 @@
             let path = '';
             let titleText = 'Riket (Hela Sverige)';
 
-            if (pathName && typeof PLATS_MAP !== 'undefined') {
-                const svtPath = PLATS_MAP[pathName];
-                if (svtPath) {
-                    path = svtPath;
-                    titleText = pathName.charAt(0).toUpperCase() + pathName.slice(1);
-                    if (svtPath.includes('kommunval') && !titleText.toLowerCase().includes('kommun')) {
+            if (pathName && window.SLUG_MAP) {
+                const match = window.SLUG_MAP[pathName];
+                if (match) {
+                    path = match.svtPath;
+                    titleText = match.name.charAt(0).toUpperCase() + match.name.slice(1);
+                    if (path.includes('kommunval') && !titleText.toLowerCase().includes('kommun')) {
                         titleText += ' kommun';
                     }
                 } else {
