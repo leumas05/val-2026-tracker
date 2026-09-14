@@ -237,9 +237,16 @@
             </div>
             
             <!-- Rak Linje för Mandatfördelning -->
-            <div style="text-align: center; margin-top: 10px; margin-bottom: 30px; position: relative;">
+            <div style="text-align: center; margin-top: 10px; margin-bottom: 20px; position: relative;">
                 <div style="font-weight: bold; margin-bottom: 5px; font-size: 0.9rem;" id="mandate-target">175 mandat</div>
                 <div class="mandate-bar" id="mandateBar"></div>
+                <div class="mandate-divider"></div>
+            </div>
+
+            <!-- Rak Linje för Röstfördelning -->
+            <div style="text-align: center; margin-bottom: 30px; position: relative;">
+                <div style="font-weight: bold; margin-bottom: 5px; font-size: 0.9rem;">Röstfördelning (%)</div>
+                <div class="mandate-bar" id="votesBar"></div>
                 <div class="mandate-divider"></div>
             </div>
 
@@ -349,7 +356,6 @@
 
     </div>
 
-    <!-- Inkludera vår ordbok över alla kommuner och regioner -->
     <script src="plats_map.js"></script>
     <script>
         const partyColors = {
@@ -360,14 +366,15 @@
             'Liberalerna': '#006AB3',
             'Moderaterna': '#52BDEC',
             'Kristdemokraterna': '#000077',
-            'Sverigedemokraterna': '#DDDD00'
+            'Sverigedemokraterna': '#DDDD00',
+            'Övriga partier': '#AAAAAA'
         };
         const partyHexColors = {
             'Vänsterpartiet': '#DA291C', 'Socialdemokraterna': '#E8112d', 'Miljöpartiet': '#83CF39',
             'Centerpartiet': '#009933', 'Liberalerna': '#006AB3', 'Moderaterna': '#52BDEC',
-            'Kristdemokraterna': '#000077', 'Sverigedemokraterna': '#DDDD00'
+            'Kristdemokraterna': '#000077', 'Sverigedemokraterna': '#DDDD00', 'Övriga partier': '#AAAAAA'
         };
-        const leftToRightOrder = ['Vänsterpartiet', 'Socialdemokraterna', 'Miljöpartiet', 'Centerpartiet', 'Liberalerna', 'Moderaterna', 'Kristdemokraterna', 'Sverigedemokraterna'];
+        const leftToRightOrder = ['Vänsterpartiet', 'Socialdemokraterna', 'Miljöpartiet', 'Centerpartiet', 'Liberalerna', 'Moderaterna', 'Kristdemokraterna', 'Sverigedemokraterna', 'Övriga partier'];
         let parliamentChartInstance = null;
 
         // Fyll datalistan
@@ -517,8 +524,11 @@
             const rightParties = ['Moderaterna', 'Sverigedemokraterna', 'Kristdemokraterna', 'Liberalerna'];
             const leftParties = ['Socialdemokraterna', 'Vänsterpartiet', 'Centerpartiet', 'Miljöpartiet'];
 
-            let rightSum = 0, leftSum = 0;
+            let rightSum = 0, leftSum = 0, otherSum = 0;
             let rightMandates = 0, leftMandates = 0;
+            
+            let totalVotes = 0;
+            Object.values(parties).forEach(p => totalVotes += p.votes);
 
             const partyListDiv = document.getElementById('parties');
             partyListDiv.innerHTML = ''; 
@@ -528,24 +538,29 @@
             sortedParties.forEach(([name, data]) => {
                 const votes = data.votes;
                 const mandates = data.mandates;
+                const percent = ((votes / totalVotes) * 100).toFixed(1) + '%';
 
                 if (rightParties.includes(name)) { rightSum += votes; rightMandates += mandates; }
-                if (leftParties.includes(name)) { leftSum += votes; leftMandates += mandates; }
+                else if (leftParties.includes(name)) { leftSum += votes; leftMandates += mandates; }
+                else { otherSum += votes; }
 
                 const card = document.createElement('div');
                 card.className = 'card';
                 let mandateText = mandates > 0 ? `<p style="font-size: 1rem; color: #555; font-weight: normal; margin-top: 5px;">${mandates} mandat</p>` : '';
                 card.innerHTML = `
                     <h3 style="color: ${partyColors[name]}">${name}</h3>
-                    <p>${formatNumber(votes)}</p>
+                    <p>${formatNumber(votes)} <span style="font-size: 0.9em; color: #777;">(${percent})</span></p>
                     ${mandateText}
                 `;
                 partyListDiv.appendChild(card);
             });
 
             // Blockinfo
-            document.getElementById('right-block-votes').innerText = formatNumber(rightSum);
-            document.getElementById('left-block-votes').innerText = formatNumber(leftSum);
+            const rightPercent = ((rightSum / totalVotes) * 100).toFixed(1) + '%';
+            const leftPercent = ((leftSum / totalVotes) * 100).toFixed(1) + '%';
+            
+            document.getElementById('right-block-votes').innerHTML = `${formatNumber(rightSum)} <span style="font-size: 0.8em; color: #777;">(${rightPercent})</span>`;
+            document.getElementById('left-block-votes').innerHTML = `${formatNumber(leftSum)} <span style="font-size: 0.8em; color: #777;">(${leftPercent})</span>`;
             document.getElementById('right-block-mandates').innerText = rightMandates + ' mandat';
             document.getElementById('left-block-mandates').innerText = leftMandates + ' mandat';
 
@@ -568,15 +583,19 @@
         }
 
         function drawVisualizations(parties) {
+            let totalVotes = 0;
+            Object.values(parties).forEach(p => totalVotes += p.votes);
+
             const orderedData = leftToRightOrder
                 .map(name => ({
                     name: name,
+                    votes: parties[name] ? parties[name].votes : 0,
                     mandates: parties[name] ? parties[name].mandates : 0,
                     totalMandates: parties[name] ? parties[name].totalMandates : 349,
                     colorStr: partyColors[name],
                     hex: partyHexColors[name]
                 }))
-                .filter(p => p.mandates > 0);
+                .filter(p => p.votes > 0); // Include parties with votes even if 0 mandates (like Övriga)
 
             // 1. Rak mandatlinje
             const mandateBar = document.getElementById('mandateBar');
@@ -585,7 +604,7 @@
             // All parties share the same totalMandates in this context
             const totalM = orderedData.length > 0 ? orderedData[0].totalMandates : 349;
 
-            orderedData.forEach(p => {
+            orderedData.filter(p => p.mandates > 0).forEach(p => {
                 const percentage = (p.mandates / totalM) * 100;
                 const segment = document.createElement('div');
                 segment.className = 'party-segment';
@@ -603,23 +622,54 @@
                     else if(p.name === 'Moderaterna') shortName = 'M';
                     else if(p.name === 'Liberalerna') shortName = 'L';
                     else if(p.name === 'Vänsterpartiet') shortName = 'V';
+                    else if(p.name === 'Övriga partier') shortName = 'ÖVR';
                     segment.innerText = shortName;
                 }
                 mandateBar.appendChild(segment);
             });
 
-            // 2. Chart.js
+            // 2. Rak röstfördelningslinje (slider)
+            const votesBar = document.getElementById('votesBar');
+            votesBar.innerHTML = '';
+            
+            orderedData.forEach(p => {
+                const percentage = (p.votes / totalVotes) * 100;
+                const segment = document.createElement('div');
+                segment.className = 'party-segment';
+                segment.style.width = percentage + '%';
+                segment.style.backgroundColor = p.colorStr;
+                segment.title = p.name + ': ' + percentage.toFixed(1) + '%';
+                
+                if (percentage > 3) {
+                    let shortName = p.name;
+                    if(p.name === 'Socialdemokraterna') shortName = 'S';
+                    else if(p.name === 'Sverigedemokraterna') shortName = 'SD';
+                    else if(p.name === 'Miljöpartiet') shortName = 'MP';
+                    else if(p.name === 'Centerpartiet') shortName = 'C';
+                    else if(p.name === 'Kristdemokraterna') shortName = 'KD';
+                    else if(p.name === 'Moderaterna') shortName = 'M';
+                    else if(p.name === 'Liberalerna') shortName = 'L';
+                    else if(p.name === 'Vänsterpartiet') shortName = 'V';
+                    else if(p.name === 'Övriga partier') shortName = 'ÖVR';
+                    segment.innerText = shortName;
+                }
+                votesBar.appendChild(segment);
+            });
+
+            // 3. Chart.js
             const ctx = document.getElementById('parliamentChart').getContext('2d');
             
             if (parliamentChartInstance) {
                 parliamentChartInstance.destroy();
             }
 
+            const chartDataArray = orderedData.filter(p => p.mandates > 0);
+
             const chartData = {
-                labels: orderedData.map(p => p.name),
+                labels: chartDataArray.map(p => p.name),
                 datasets: [{
-                    data: orderedData.map(p => p.mandates),
-                    backgroundColor: orderedData.map(p => p.hex),
+                    data: chartDataArray.map(p => p.mandates),
+                    backgroundColor: chartDataArray.map(p => p.hex),
                     borderWidth: 2,
                     borderColor: '#fff'
                 }]
