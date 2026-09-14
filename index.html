@@ -293,7 +293,7 @@
                     </div>
                     <button type="submit" id="search-btn">Sök</button>
                 </form>
-                <div style="margin-top: 10px;">
+                <div id="back-to-riket-container" style="margin-top: 10px;">
                     <a href="#" onclick="history.pushState({}, '', '/'); handleRoute(); return false;" style="color: #3498db; text-decoration: none; font-size: 0.9rem;">Tillbaka till Riket (Hela Sverige)</a>
                 </div>
             </div>
@@ -684,6 +684,11 @@
                     history.replaceState({}, '', '/');
                     pathName = '';
                 }
+            }
+            
+            const backContainer = document.getElementById('back-to-riket-container');
+            if (backContainer) {
+                backContainer.style.display = (pathName === '') ? 'none' : 'block';
             }
 
             document.getElementById('page-title').innerText = 'Val 2026: ' + titleText;
