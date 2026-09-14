@@ -827,10 +827,12 @@
             const rightList = document.getElementById('sortable-right');
             const noMandateList = document.getElementById('no-mandate-list');
             
-            // Standard f�r regeringsblocket
+            // Standard för regeringsblocket
             const leftDefaults = ['Moderaterna', 'Sverigedemokraterna', 'Liberalerna', 'Kristdemokraterna'];
             
             Object.keys(parties).forEach(p => {
+                if (p === 'Övriga partier' || p === 'Övrigt') return; // Skapa aldrig piller för Övriga partier
+                
                 const data = parties[p];
                 let pill = document.querySelector(`.party-drag-item[data-party="${p}"]`);
                 
@@ -872,6 +874,13 @@
                     pill.style.display = 'none';
                 }
             });
+
+            const visibleNoMandates = Array.from(noMandateList.children).filter(el => el.style.display !== 'none');
+            if (visibleNoMandates.length === 0) {
+                noMandateList.parentElement.style.display = 'none';
+            } else {
+                noMandateList.parentElement.style.display = 'block';
+            }
 
             updateBlockStats();
         }
