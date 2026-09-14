@@ -932,8 +932,10 @@
                 try { savedLayout = JSON.parse(savedLayoutJson); } catch(e) {}
             }
 
+            const partyPills = {};
+
             Object.keys(parties).forEach(p => {
-                if (p.toLowerCase().includes('övrig') || p.toLowerCase().includes('vrig')) return;
+                if (p.toLowerCase().includes('�vrig') || p.toLowerCase().includes('vrig')) return;
                 
                 const data = parties[p];
                 if (data.votes === 0) return;
@@ -955,6 +957,7 @@
                 }
                 
                 pill.style.display = 'block';
+                partyPills[p] = pill;
                 
                 if (data.mandates === 0) {
                     pill.style.cursor = 'default';
@@ -966,29 +969,29 @@
 
             if (savedLayout) {
                 savedLayout.left.forEach(p => {
-                    const pill = document.querySelector(`.party-drag-item[data-party="${p}"]`);
+                    const pill = partyPills[p];
                     if (pill && parties[p] && parties[p].mandates > 0) leftList.appendChild(pill);
                 });
                 savedLayout.right.forEach(p => {
-                    const pill = document.querySelector(`.party-drag-item[data-party="${p}"]`);
+                    const pill = partyPills[p];
                     if (pill && parties[p] && parties[p].mandates > 0) rightList.appendChild(pill);
                 });
                 Object.keys(parties).forEach(p => {
-                    if (p.toLowerCase().includes('övrig') || p.toLowerCase().includes('vrig')) return;
+                    if (p.toLowerCase().includes('�vrig') || p.toLowerCase().includes('vrig')) return;
                     const data = parties[p];
                     if (data.mandates > 0) {
-                        const pill = document.querySelector(`.party-drag-item[data-party="${p}"]`);
+                        const pill = partyPills[p];
                         if (pill && pill.parentElement !== leftList && pill.parentElement !== rightList) {
-                            rightList.appendChild(pill); // Default to right if missing from saved layout
+                            rightList.appendChild(pill);
                         }
                     }
                 });
             } else {
                 Object.keys(parties).forEach(p => {
-                    if (p.toLowerCase().includes('övrig') || p.toLowerCase().includes('vrig')) return;
+                    if (p.toLowerCase().includes('�vrig') || p.toLowerCase().includes('vrig')) return;
                     const data = parties[p];
                     if (data.mandates > 0) {
-                        const pill = document.querySelector(`.party-drag-item[data-party="${p}"]`);
+                        const pill = partyPills[p];
                         if (pill && pill.parentElement !== leftList && pill.parentElement !== rightList) {
                             if (leftDefaults.includes(p)) leftList.appendChild(pill);
                             else rightList.appendChild(pill);
