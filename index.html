@@ -304,7 +304,10 @@
         </div>
 
         <div class="section" id="data-section" style="display: none;">
-            <h2>Resultat</h2>
+            <h2 style="display: flex; justify-content: center; align-items: center; gap: 10px;">
+                Resultat
+                <button onclick="document.getElementById('map-section').scrollIntoView({behavior: 'smooth'})" style="font-size: 0.9rem; padding: 5px 10px; background: #3498db; border: none; border-radius: 4px; color: white; cursor: pointer; display: flex; align-items: center; gap: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">🗺️ Karta 👇</button>
+            </h2>
             <p id="result-total-mandates" style="text-align: center; color: #bbb; margin-top: -10px; margin-bottom: 20px;"></p>
             <div id="error-message" style="color: red; text-align: center; display: none;"></div>
             <!-- Rest of code is unchanged below... -->
@@ -347,7 +350,42 @@
             </div>
         </div>
 
-        <div class="section" id="map-section" style="min-height: 800px;">
+        
+
+        <div class="section">
+            <h2>Bygg din egna regering</h2>
+            <p style="text-align: center; color: #bbb; margin-bottom: 20px;">Dra och släpp partierna mellan blocken för att se hur maktfördelningen förändras i realtid!</p>
+            <div class="blocks-container">
+                <div class="block-card blue" style="border-top-color: #e74c3c;">
+                    <h3 id="right-block-title">Opposition</h3>
+                    <p id="right-block-votes">0</p>
+                    <small>röster</small>
+                    <p id="right-block-mandates" style="font-size: 1.2rem; color: #bbb; margin-top: 10px;">0 mandat</p>
+                    <div id="sortable-right" class="sortable-list" style="margin-top: 15px; min-height: 60px; background: #121212; padding: 10px; border-radius: 8px;"></div>
+                </div>
+
+                <div class="block-card grey" style="border-top-color: #555; flex: 0.6; min-width: 150px;">
+                    <h3 style="font-size: 1.1rem; color: #bbb;">Utan mandat</h3>
+                    <div id="no-mandate-list" style="margin-top: 15px; min-height: 60px; background: #121212; padding: 10px; border-radius: 8px; display: flex; flex-direction: column; gap: 5px;"></div>
+                </div>
+
+                <div class="block-card red" style="border-top-color: #3498db;">
+                    <h3 id="left-block-title">Regering</h3>
+                    <p id="left-block-votes">0</p>
+                    <small>röster</small>
+                    <p id="left-block-mandates" style="font-size: 1.2rem; color: #bbb; margin-top: 10px;">0 mandat</p>
+                    <div id="sortable-left" class="sortable-list" style="margin-top: 15px; min-height: 60px; background: #121212; padding: 10px; border-radius: 8px;"></div>
+                </div>
+            </div>
+
+            <div class="diff-card">
+                <h3 id="diff-title">Skillnad mellan Regering och Opposition</h3>
+                <p id="diff-votes">0</p>
+                <p style="font-size: 1.2rem; margin-top: 5px; font-weight: normal;" id="diff-text"></p>
+            </div>
+        </div>
+
+    <div class="section" id="map-section" style="min-height: 800px;">
             <h2>Interaktiv Karta</h2>
             <p style="text-align: center; margin-bottom: 15px; color: #bbb;">Utforska valdistrikt, kommuner och regioner direkt i SVT:s egna kartverktyg. Sök efter din ort!</p>
             
@@ -452,40 +490,6 @@
                 }
             </script>
         </div>
-
-        <div class="section">
-            <h2>Bygg din egna regering</h2>
-            <p style="text-align: center; color: #bbb; margin-bottom: 20px;">Dra och släpp partierna mellan blocken för att se hur maktfördelningen förändras i realtid!</p>
-            <div class="blocks-container">
-                <div class="block-card blue" style="border-top-color: #e74c3c;">
-                    <h3 id="right-block-title">Opposition</h3>
-                    <p id="right-block-votes">0</p>
-                    <small>röster</small>
-                    <p id="right-block-mandates" style="font-size: 1.2rem; color: #bbb; margin-top: 10px;">0 mandat</p>
-                    <div id="sortable-right" class="sortable-list" style="margin-top: 15px; min-height: 60px; background: #121212; padding: 10px; border-radius: 8px;"></div>
-                </div>
-
-                <div class="block-card grey" style="border-top-color: #555; flex: 0.6; min-width: 150px;">
-                    <h3 style="font-size: 1.1rem; color: #bbb;">Utan mandat</h3>
-                    <div id="no-mandate-list" style="margin-top: 15px; min-height: 60px; background: #121212; padding: 10px; border-radius: 8px; display: flex; flex-direction: column; gap: 5px;"></div>
-                </div>
-
-                <div class="block-card red" style="border-top-color: #3498db;">
-                    <h3 id="left-block-title">Regering</h3>
-                    <p id="left-block-votes">0</p>
-                    <small>röster</small>
-                    <p id="left-block-mandates" style="font-size: 1.2rem; color: #bbb; margin-top: 10px;">0 mandat</p>
-                    <div id="sortable-left" class="sortable-list" style="margin-top: 15px; min-height: 60px; background: #121212; padding: 10px; border-radius: 8px;"></div>
-                </div>
-            </div>
-
-            <div class="diff-card">
-                <h3 id="diff-title">Skillnad mellan Regering och Opposition</h3>
-                <p id="diff-votes">0</p>
-                <p style="font-size: 1.2rem; margin-top: 5px; font-weight: normal;" id="diff-text"></p>
-            </div>
-        </div>
-
     </div>
 
     <script src="/plats_map.js"></script>
