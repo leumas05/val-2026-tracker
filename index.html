@@ -716,6 +716,7 @@
         }
 
         function fetchData(path = '') {
+            window.CURRENT_PATH = path || 'riksdag';
             if (path.includes('kommunval')) window.APP_LEVEL = 'kommun';
             else if (path.includes('regionval')) window.APP_LEVEL = 'region';
             else window.APP_LEVEL = 'riksdag';
@@ -925,11 +926,17 @@
             // Standard för regeringsblocket
             const leftDefaults = ['Moderaterna', 'Sverigedemokraterna', 'Liberalerna', 'Kristdemokraterna'];
             
+            const savedLayoutJson = localStorage.getItem('roster_layout_' + (window.CURRENT_PATH || 'riksdag'));
+            let savedLayout = null;
+            if (savedLayoutJson) {
+                try { savedLayout = JSON.parse(savedLayoutJson); } catch(e) {}
+            }
+
             Object.keys(parties).forEach(p => {
-                if (p.toLowerCase().includes('övrig')) return; // Skapa aldrig piller för Övriga partier
+                if (p.toLowerCase().includes('övrig') || p.toLowerCase().includes('vrig')) return;
                 
                 const data = parties[p];
-                if (data.votes === 0) return; // Ignorera partier med 0 röster helt
+                if (data.votes === 0) return;
                 
                 let pill = document.querySelector(`.party-drag-item[data-party="${p}"]`);
                 
@@ -951,20 +958,44 @@
                 
                 if (data.mandates === 0) {
                     pill.style.cursor = 'default';
-                    if (pill.parentElement !== noMandateList) {
-                        noMandateList.appendChild(pill);
-                    }
+                    noMandateList.appendChild(pill);
                 } else {
                     pill.style.cursor = 'grab';
-                    if (!pill.parentElement || pill.parentElement === noMandateList) {
-                        if (leftDefaults.includes(p)) {
-                            leftList.appendChild(pill);
-                        } else {
-                            rightList.appendChild(pill);
-                        }
-                    }
                 }
             });
+
+            if (savedLayout) {
+                savedLayout.left.forEach(p => {
+                    const pill = document.querySelector(`.party-drag-item[data-party="${p}"]`);
+                    if (pill && parties[p] && parties[p].mandates > 0) leftList.appendChild(pill);
+                });
+                savedLayout.right.forEach(p => {
+                    const pill = document.querySelector(`.party-drag-item[data-party="${p}"]`);
+                    if (pill && parties[p] && parties[p].mandates > 0) rightList.appendChild(pill);
+                });
+                Object.keys(parties).forEach(p => {
+                    if (p.toLowerCase().includes('övrig') || p.toLowerCase().includes('vrig')) return;
+                    const data = parties[p];
+                    if (data.mandates > 0) {
+                        const pill = document.querySelector(`.party-drag-item[data-party="${p}"]`);
+                        if (pill && pill.parentElement !== leftList && pill.parentElement !== rightList) {
+                            rightList.appendChild(pill); // Default to right if missing from saved layout
+                        }
+                    }
+                });
+            } else {
+                Object.keys(parties).forEach(p => {
+                    if (p.toLowerCase().includes('övrig') || p.toLowerCase().includes('vrig')) return;
+                    const data = parties[p];
+                    if (data.mandates > 0) {
+                        const pill = document.querySelector(`.party-drag-item[data-party="${p}"]`);
+                        if (pill && pill.parentElement !== leftList && pill.parentElement !== rightList) {
+                            if (leftDefaults.includes(p)) leftList.appendChild(pill);
+                            else rightList.appendChild(pill);
+                        }
+                    }
+                });
+            }
 
             Array.from(document.querySelectorAll('.party-drag-item')).forEach(pill => {
                 if (!parties[pill.dataset.party]) {
@@ -1044,6 +1075,13 @@
             
             const diffTitleEl = document.getElementById('diff-title');
             if(diffTitleEl) diffTitleEl.innerText = 'Skillnad mellan ' + leftTitle + ' och Opposition';
+
+            // Spara layout per val i webbläsaren
+            const layoutState = {
+                left: leftPartiesDOM,
+                right: rightPartiesDOM
+            };
+            localStorage.setItem('roster_layout_' + (window.CURRENT_PATH || 'riksdag'), JSON.stringify(layoutState));
 
             drawVisualizations(leftPartiesDOM, rightPartiesDOM);
         }
