@@ -303,11 +303,9 @@
             Laddar live-resultat från SVT...
         </div>
 
-        <div class="section" id="data-section" style="display: none;">
-            <h2 style="display: flex; justify-content: center; align-items: center; gap: 10px;">
-                Resultat
-                <button onclick="document.getElementById('map-section').scrollIntoView({behavior: 'smooth'})" style="font-size: 0.9rem; padding: 5px 10px; background: #3498db; border: none; border-radius: 4px; color: white; cursor: pointer; display: flex; align-items: center; gap: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">🗺️ Karta 👇</button>
-            </h2>
+        <div class="section" id="data-section" style="display: none; position: relative;">
+            <button onclick="scrollToMapAndLoad()" style="position: absolute; top: 15px; left: 15px; font-size: 0.9rem; padding: 6px 12px; background: #3498db; border: none; border-radius: 4px; color: white; cursor: pointer; display: flex; align-items: center; gap: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">🗺️ Karta 👇</button>
+            <h2 id="result-title">Resultat</h2>
             <p id="result-total-mandates" style="text-align: center; color: #bbb; margin-top: -10px; margin-bottom: 20px;"></p>
             <div id="error-message" style="color: red; text-align: center; display: none;"></div>
             <!-- Rest of code is unchanged below... -->
@@ -477,6 +475,13 @@
                     document.getElementById('map-wrapper').style.display = 'block';
                     document.getElementById('toggle-map-btn').style.display = 'block';
                     document.getElementById('svt-map-iframe').src = "https://www.svt.se/datajournalistik/sa-rostade-svenskarna/?view=map&year=2026&live2026=true";
+                }
+
+                function scrollToMapAndLoad() {
+                    if (document.getElementById('map-wrapper').style.display === 'none') {
+                        loadMap();
+                    }
+                    document.getElementById('map-section').scrollIntoView({behavior: 'smooth'});
                 }
 
                 function toggleMapModal() {
