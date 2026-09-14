@@ -246,7 +246,10 @@
             
             <!-- Rak Linje för Mandatfördelning -->
             <div style="text-align: center; margin-top: 10px; margin-bottom: 20px; position: relative;">
-                <div style="font-weight: bold; margin-bottom: 5px; font-size: 0.9rem;" id="mandate-target">175 mandat</div>
+                <div style="display: flex; justify-content: center; align-items: baseline; margin-bottom: 5px; position: relative;">
+                    <div style="position: absolute; left: 0; font-size: 0.85rem; color: #555; font-weight: normal;" id="mandate-total-text">Totalt 349 mandat</div>
+                    <div style="font-weight: bold; font-size: 0.9rem;" id="mandate-target">175 mandat</div>
+                </div>
                 <div class="middle-arrow" style="top: 15px;">▼</div>
                 <div class="mandate-bar" id="mandateBar"></div>
             </div>
@@ -495,33 +498,41 @@
 
                     partyElements.forEach(el => {
                         const partyName = el.textContent.trim();
-                        if (partyColors[partyName]) {
-                            let parent = el.parentElement;
-                            let limit = 5; 
-                            while (parent && limit > 0) {
-                                const textContent = parent.textContent.replace(/\s+/g, ' ');
-                                const voteMatch = textContent.match(/([\d\s]+)röster/);
-                                // Leta efter "X av Y mandat" oavsett versaler/gemener
-                                const mandateMatch = textContent.match(/(\d+)\s*av\s*(\d+)\s*mandat/i);
-                                
-                                if (voteMatch) {
-                                    const rawVotesStr = voteMatch[1].replace(/\s/g, '');
-                                    const votes = parseInt(rawVotesStr, 10);
-                                    let mandates = 0;
-                                    let totalMandates = 349;
-                                    
-                                    if (mandateMatch) {
-                                        mandates = parseInt(mandateMatch[1], 10);
-                                        totalMandates = parseInt(mandateMatch[2], 10);
-                                    }
-                                    
-                                    parties[partyName] = { votes: votes, mandates: mandates, totalMandates: totalMandates };
-                                    console.log("Parsed party:", partyName, parties[partyName]);
-                                    break;
-                                }
-                                parent = parent.parentElement;
-                                limit--;
+                        
+                        // Om partiet inte finns i våra färglistor (ett lokalt parti), lägg till det
+                        if (!partyColors[partyName]) {
+                            partyColors[partyName] = '#666666'; // Standardfärg
+                            partyHexColors[partyName] = '#666666';
+                            if (!leftToRightOrder.includes(partyName)) {
+                                leftToRightOrder.push(partyName);
                             }
+                        }
+
+                        let parent = el.parentElement;
+                        let limit = 5; 
+                        while (parent && limit > 0) {
+                            const textContent = parent.textContent.replace(/\s+/g, ' ');
+                            const voteMatch = textContent.match(/([\d\s]+)röster/);
+                            // Leta efter "X av Y mandat" oavsett versaler/gemener
+                            const mandateMatch = textContent.match(/(\d+)\s*av\s*(\d+)\s*mandat/i);
+                            
+                            if (voteMatch) {
+                                const rawVotesStr = voteMatch[1].replace(/\s/g, '');
+                                const votes = parseInt(rawVotesStr, 10);
+                                
+                                let mandates = 0;
+                                let totalMandates = 349;
+                                
+                                if (mandateMatch) {
+                                    mandates = parseInt(mandateMatch[1], 10);
+                                    totalMandates = parseInt(mandateMatch[2], 10);
+                                }
+                                
+                                parties[partyName] = { votes: votes, mandates: mandates, totalMandates: totalMandates };
+                                break;
+                            }
+                            parent = parent.parentElement;
+                            limit--;
                         }
                     });
 
@@ -644,6 +655,7 @@
             
             // Uppdatera "175 mandat"-målet till hälften av totala mandaten för aktuell plats
             document.getElementById('mandate-target').innerText = Math.ceil(totalM / 2) + ' mandat';
+            document.getElementById('mandate-total-text').innerText = 'Totalt ' + totalM + ' mandat';
 
             orderedData.filter(p => p.mandates > 0).forEach(p => {
                 const percentage = (p.mandates / totalM) * 100;
@@ -664,6 +676,7 @@
                     else if(p.name === 'Liberalerna') shortName = 'L';
                     else if(p.name === 'Vänsterpartiet') shortName = 'V';
                     else if(p.name === 'Övriga partier') shortName = 'ÖVR';
+                    else if(shortName.length > 5) shortName = shortName.substring(0, 3);
                     segment.innerText = shortName;
                 }
                 mandateBar.appendChild(segment);
@@ -692,6 +705,7 @@
                     else if(p.name === 'Liberalerna') shortName = 'L';
                     else if(p.name === 'Vänsterpartiet') shortName = 'V';
                     else if(p.name === 'Övriga partier') shortName = 'ÖVR';
+                    else if(shortName.length > 5) shortName = shortName.substring(0, 3);
                     segment.innerText = shortName;
                 }
                 votesBar.appendChild(segment);
