@@ -313,26 +313,32 @@
             </div>
             
             <!-- Rak Linje för Mandatfördelning -->
-            <div style="text-align: center; margin-top: 10px; margin-bottom: 20px; position: relative;">
+            <div style="text-align: center; margin-top: 10px; margin-bottom: 20px;">
                 <div style="display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 5px; font-size: 0.9rem; position: relative;">
                     <span id="right-block-mandate-text" style="color: #bbb; z-index: 10;">Opposition: 0 mandat</span>
                     <span id="mandate-target" style="position: absolute; left: 50%; transform: translateX(-50%);">175 mandat</span>
                     <span id="left-block-mandate-text" style="color: #bbb; z-index: 10;">Regering: 0 mandat</span>
                 </div>
-                <div style="text-align: center; font-size: 0.85rem; color: #999; margin-bottom: 5px;" id="mandate-total-text">Totalt 349 mandat</div>
-                <div class="middle-arrow" style="top: 25px;">↓</div>
-                <div class="mandate-bar" id="mandateBar"></div>
+                <div style="text-align: center; font-size: 0.85rem; color: #999; margin-bottom: 25px;" id="mandate-total-text">Totalt 349 mandat</div>
+                
+                <div style="position: relative;">
+                    <div class="middle-arrow" style="top: -20px;">↓</div>
+                    <div class="mandate-bar" id="mandateBar"></div>
+                </div>
             </div>
 
             <!-- Rak Linje för Röstfördelning -->
-            <div style="text-align: center; margin-bottom: 30px; position: relative;">
-                <div style="display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 5px; font-size: 0.9rem; position: relative;">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <div style="display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 25px; font-size: 0.9rem; position: relative;">
                     <span id="right-block-slider-text" style="color: #bbb; z-index: 10;">Opposition: 0%</span>
-                    <span style="position: absolute; left: 50%; transform: translateX(-50%);">R�stf�rdelning</span>
+                    <span style="position: absolute; left: 50%; transform: translateX(-50%);">Röstfördelning</span>
                     <span id="left-block-slider-text" style="color: #bbb; z-index: 10;">Regering: 0%</span>
                 </div>
-                <div class="middle-arrow" style="top: 15px;">↓</div>
-                <div class="mandate-bar" id="votesBar"></div>
+                
+                <div style="position: relative;">
+                    <div class="middle-arrow" style="top: -20px;">↓</div>
+                    <div class="mandate-bar" id="votesBar"></div>
+                </div>
             </div>
 
             <div class="party-grid" id="parties">
@@ -492,14 +498,14 @@
             'Moderaterna': '#52BDEC',
             'Kristdemokraterna': '#000077',
             'Sverigedemokraterna': '#DDDD00',
-            'Övriga partier': '#AAAAAA'
+            'Ö�vriga partier': '#AAAAAA'
         };
         const partyHexColors = {
             'Vänsterpartiet': '#DA291C', 'Socialdemokraterna': '#E8112d', 'Miljöpartiet': '#83CF39',
             'Centerpartiet': '#009933', 'Liberalerna': '#006AB3', 'Moderaterna': '#52BDEC',
-            'Kristdemokraterna': '#000077', 'Sverigedemokraterna': '#DDDD00', 'Övriga partier': '#AAAAAA'
+            'Kristdemokraterna': '#000077', 'Sverigedemokraterna': '#DDDD00', 'Ö�vriga partier': '#AAAAAA'
         };
-        const leftToRightOrder = ['Vänsterpartiet', 'Socialdemokraterna', 'Miljöpartiet', 'Centerpartiet', 'Övriga partier', 'Liberalerna', 'Moderaterna', 'Kristdemokraterna', 'Sverigedemokraterna'];
+        const leftToRightOrder = ['Vänsterpartiet', 'Socialdemokraterna', 'Miljöpartiet', 'Centerpartiet', 'Ö�vriga partier', 'Liberalerna', 'Moderaterna', 'Kristdemokraterna', 'Sverigedemokraterna'];
         let parliamentChartInstance = null;
 
         // Förbered sök-data och Autocomplete
@@ -792,7 +798,7 @@
             else if(p === 'Moderaterna') shortName = 'M';
             else if(p === 'Liberalerna') shortName = 'L';
             else if(p === 'Vänsterpartiet') shortName = 'V';
-            else if(p === 'Övriga partier') shortName = 'ÖVR';
+            else if(p === 'Ö�vriga partier') shortName = 'ÖVR';
             else if(shortName.length > 5) shortName = shortName.substring(0, 3).toUpperCase();
             return shortName;
         }
@@ -855,7 +861,7 @@
             const leftDefaults = ['Moderaterna', 'Sverigedemokraterna', 'Liberalerna', 'Kristdemokraterna'];
             
             Object.keys(parties).forEach(p => {
-                if (p === 'Övriga partier' || p === 'Övrigt') return; // Skapa aldrig piller för Övriga partier
+                if (p === 'Ö�vriga partier' || p === 'Övrigt') return; // Skapa aldrig piller för Ö�vriga partier
                 
                 const data = parties[p];
                 let pill = document.querySelector(`.party-drag-item[data-party="${p}"]`);
