@@ -754,7 +754,7 @@
                         let limit = 5; 
                         while (parent && limit > 0) {
                             const textContent = parent.textContent.replace(/\s+/g, ' ');
-                            const voteMatch = textContent.match(/([\d\s]+)röster/);
+                            const voteMatch = textContent.match(/(\d[\d\s]*)r.*st(?:er)?/i);
                             // Leta efter "X av Y mandat" oavsett versaler/gemener
                             const mandateMatch = textContent.match(/(\d+)\s*av\s*(\d+)\s*mandat/i);
                             
