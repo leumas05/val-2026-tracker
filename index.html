@@ -1232,13 +1232,18 @@
             const rightPercent = totalVotes > 0 ? ((rightSum / totalVotes) * 100).toFixed(1) + '%' : '0%';
             
             
-            const leftTitle = hasMandates ? getLeftTitle() : 'Block 1';
+                        const leftTitle = hasMandates ? getLeftTitle() : 'Block 1';
             const rightTitle = hasMandates ? 'Opposition' : 'Block 2';
             
             document.getElementById('left-block-title').innerText = leftTitle;
             document.getElementById('right-block-title').innerText = rightTitle;
             
-            // Uppdatera texterna �ver sliders
+            document.getElementById('left-block-votes').innerHTML = `${formatNumber(leftSum)} <span style="font-size: 0.8em; color: #999;">(${leftPercent})</span>`;
+            document.getElementById('right-block-votes').innerHTML = `${formatNumber(rightSum)} <span style="font-size: 0.8em; color: #999;">(${rightPercent})</span>`;
+            document.getElementById('left-block-mandates').innerText = leftMandates + ' mandat';
+            document.getElementById('right-block-mandates').innerText = rightMandates + ' mandat';
+            
+            // Uppdatera texterna över sliders
             document.getElementById('left-block-mandate-text').innerText = `${leftTitle}: ${leftMandates} mandat`;
             document.getElementById('right-block-mandate-text').innerText = `${rightTitle}: ${rightMandates} mandat`;
             
@@ -1248,8 +1253,8 @@
             const diff = Math.abs(leftSum - rightSum);
             document.getElementById('diff-votes').innerText = formatNumber(diff) + ' röster';
             let diffText = '';
-            if (leftSum > rightSum) diffText = '�vertag för ' + leftTitle;
-            else if (rightSum > leftSum) diffText = '�vertag för ' + rightTitle;
+            if (leftSum > rightSum) diffText = 'Övertag för ' + leftTitle;
+            else if (rightSum > leftSum) diffText = 'Övertag för ' + rightTitle;
             else diffText = 'Exakt lika!';
             document.getElementById('diff-text').innerText = diffText;
             
