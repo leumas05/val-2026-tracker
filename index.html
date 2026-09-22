@@ -962,13 +962,44 @@
             }
 
 
+            const big8 = ['Socialdemokraterna', 'Moderaterna', 'Sverigedemokraterna', 'Centerpartiet', 'V�nsterpartiet', 'Kristdemokraterna', 'Liberalerna', 'Milj�partiet'];
+            let smallPartyCount = 0;
+            let hiddenVotes = 0;
+            let hiddenMandates = 0;
+            const hiddenCards = [];
+            let svtOvrigaData = null;
+
             sortedParties.forEach(([name, data]) => {
+                if (name.toLowerCase().includes('�vrig') || name.toLowerCase().includes('vrig')) {
+                    svtOvrigaData = data;
+                }
+            });
+
+            sortedParties.forEach(([name, data]) => {
+                if (name.toLowerCase().includes('�vrig') || name.toLowerCase().includes('vrig')) return;
+                
+                const isBig8 = big8.includes(name);
+                let isHidden = false;
+                
+                if (!isBig8) {
+                    smallPartyCount++;
+                    if (smallPartyCount > 7) {
+                        isHidden = true;
+                        hiddenVotes += data.votes;
+                        hiddenMandates += (data.mandates || 0);
+                    }
+                }
+
                 const votes = data.votes;
                 const mandates = data.mandates;
                 const percent = ((votes / totalVotes) * 100).toFixed(1) + '%';
                 const card = document.createElement('div');
                 card.className = 'card';
-                let mandateText = mandates > 0 ? `<p style="font-size: 1rem; color: #bbb; font-weight: normal; margin-top: 5px;">${mandates} mandat</p>` : '';
+                if (isHidden) {
+                    card.style.display = 'none';
+                    hiddenCards.push(card);
+                }
+                let mandateText = (mandates > 0 && hasMandates) ? `<p style="font-size: 1rem; color: #bbb; font-weight: normal; margin-top: 5px;">${mandates} mandat</p>` : '';
                 card.innerHTML = `
                     <h3 style="color: ${partyColors[name] || '#666'}">${name}</h3>
                     <p>${formatNumber(votes)} <span style="font-size: 0.9em; color: #999;">(${percent})</span></p>
@@ -977,19 +1008,65 @@
                 partyListDiv.appendChild(card);
             });
 
+            const totalOvrigtVotes = hiddenVotes + (svtOvrigaData ? svtOvrigaData.votes : 0);
+            const totalOvrigtMandates = hiddenMandates + (svtOvrigaData ? (svtOvrigaData.mandates || 0) : 0);
+
+            if (totalOvrigtVotes > 0) {
+                const percent = ((totalOvrigtVotes / totalVotes) * 100).toFixed(1) + '%';
+                const ovrigtCard = document.createElement('div');
+                ovrigtCard.className = 'card';
+                ovrigtCard.style.cursor = 'pointer';
+                ovrigtCard.style.backgroundColor = '#1a1a1a';
+                ovrigtCard.style.border = '1px dashed #444';
+                ovrigtCard.style.transition = 'background-color 0.2s';
+                ovrigtCard.onmouseover = () => ovrigtCard.style.backgroundColor = '#2a2a2a';
+                ovrigtCard.onmouseout = () => ovrigtCard.style.backgroundColor = '#1a1a1a';
+
+                let mText = (totalOvrigtMandates > 0 && hasMandates) ? `<p style="font-size: 1rem; color: #bbb; font-weight: normal; margin-top: 5px;">${totalOvrigtMandates} mandat</p>` : '';
+                ovrigtCard.innerHTML = `
+                    <h3 style="color: #ccc; margin-bottom: 5px;">�vrigt</h3>
+                    <p style="font-size: 0.85rem; color: #888; margin-bottom: 10px;">(Klicka f�r att visa ${hiddenCards.length + (svtOvrigaData ? 1 : 0)} parti${hiddenCards.length + (svtOvrigaData ? 1 : 0) > 1 ? 'er' : ''})</p>
+                    <p>${formatNumber(totalOvrigtVotes)} <span style="font-size: 0.9em; color: #999;">(${percent})</span></p>
+                    ${mText}
+                `;
+                partyListDiv.appendChild(ovrigtCard);
+
+                if (svtOvrigaData && svtOvrigaData.votes > 0) {
+                    const svtPercent = ((svtOvrigaData.votes / totalVotes) * 100).toFixed(1) + '%';
+                    const svtCard = document.createElement('div');
+                    svtCard.className = 'card';
+                    svtCard.style.display = 'none';
+                    let svtMText = (svtOvrigaData.mandates > 0 && hasMandates) ? `<p style="font-size: 1rem; color: #bbb; font-weight: normal; margin-top: 5px;">${svtOvrigaData.mandates} mandat</p>` : '';
+                    svtCard.innerHTML = `
+                        <h3 style="color: #999">�vriga partier</h3>
+                        <p>${formatNumber(svtOvrigaData.votes)} <span style="font-size: 0.9em; color: #999;">(${svtPercent})</span></p>
+                        ${svtMText}
+                    `;
+                    partyListDiv.appendChild(svtCard);
+                    hiddenCards.push(svtCard);
+                }
+
+                ovrigtCard.onclick = () => {
+                    ovrigtCard.style.display = 'none';
+                    hiddenCards.forEach(card => card.style.display = 'block');
+                };
+            }
+
             if (!window.SORTABLES_INIT) {
                 const sortableOptions = {
                     group: 'shared',
                     animation: 100, // Faster, snappier animation
                     easing: "cubic-bezier(0.25, 1, 0.5, 1)", // Snappy easing
                     emptyInsertThreshold: 50, // Much easier to drop into empty list
-                    swapThreshold: 0.65, // Swaps earlier when dragging over another item
+
+                    swapThreshold: 0.65,
                     forceFallback: false,
                     ghostClass: 'sortable-ghost-custom',
                     onEnd: updateBlockStats
                 };
                 new Sortable(document.getElementById('sortable-left'), sortableOptions);
                 new Sortable(document.getElementById('sortable-right'), sortableOptions);
+                new Sortable(document.getElementById('no-mandate-list'), sortableOptions);
                 window.SORTABLES_INIT = true;
             }
 
