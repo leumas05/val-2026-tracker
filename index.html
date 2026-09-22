@@ -329,7 +329,7 @@
                 <canvas id="parliamentChart" style="max-width: 600px; margin: 0 auto;"></canvas>
             </div>
             
-            <!-- Rak Linje f�r Mandatf�rdelning -->
+            <!-- Rak Linje fr Mandatfrdelning -->
             <div id="mandate-bar-container" style="text-align: center; margin-top: 10px; margin-bottom: 20px;">
                 <div style="display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 5px; font-size: 0.9rem; position: relative;">
                     <span id="right-block-mandate-text" style="color: #bbb; z-index: 10;">Opposition: 0 mandat</span>
@@ -921,10 +921,16 @@
             window.APP_PARTIES = parties;
             
             // Uppdatera rubriken "Bygg din egna regering/regionstyrelse/kommunstyrelse"
+            
             const buildTitleEl = document.getElementById('build-government-title');
             if (buildTitleEl) {
-                buildTitleEl.innerText = 'Bygg din egna ' + getLeftTitle().toLowerCase();
+                if (!hasMandates) {
+                    buildTitleEl.innerText = 'Bygg dina egna block';
+                } else {
+                    buildTitleEl.innerText = 'Bygg din egna ' + getLeftTitle().toLowerCase();
+                }
             }
+
 
             const errorDiv = document.getElementById('error-message');
             if (Object.keys(parties).length === 0) {
@@ -953,6 +959,12 @@
             document.getElementById('left-block-mandates').style.display = hasMandates ? 'block' : 'none';
             document.getElementById('right-block-mandates').style.display = hasMandates ? 'block' : 'none';
             
+            
+            const noMandateTitle = document.querySelector('#no-mandate-list').previousElementSibling;
+            if (noMandateTitle) {
+                noMandateTitle.innerText = hasMandates ? 'Utan mandat' : 'Övriga partier';
+            }
+
             const totalMandatesText = document.getElementById('result-total-mandates');
             if (hasMandates) {
                 totalMandatesText.style.display = 'block';
@@ -962,7 +974,7 @@
             }
 
 
-            const big8 = ['Socialdemokraterna', 'Moderaterna', 'Sverigedemokraterna', 'Centerpartiet', 'V�nsterpartiet', 'Kristdemokraterna', 'Liberalerna', 'Milj�partiet'];
+            const big8 = ['Socialdemokraterna', 'Moderaterna', 'Sverigedemokraterna', 'Centerpartiet', 'Vänsterpartiet', 'Kristdemokraterna', 'Liberalerna', 'Miljöpartiet'];
             let smallPartyCount = 0;
             let hiddenVotes = 0;
             let hiddenMandates = 0;
@@ -970,13 +982,13 @@
             let svtOvrigaData = null;
 
             sortedParties.forEach(([name, data]) => {
-                if (name.toLowerCase().includes('�vrig') || name.toLowerCase().includes('vrig')) {
+                if (name.toLowerCase().includes('vrig') || name.toLowerCase().includes('vrig')) {
                     svtOvrigaData = data;
                 }
             });
 
             sortedParties.forEach(([name, data]) => {
-                if (name.toLowerCase().includes('�vrig') || name.toLowerCase().includes('vrig')) return;
+                if (name.toLowerCase().includes('vrig') || name.toLowerCase().includes('vrig')) return;
                 
                 const isBig8 = big8.includes(name);
                 let isHidden = false;
@@ -1024,8 +1036,8 @@
 
                 let mText = (totalOvrigtMandates > 0 && hasMandates) ? `<p style="font-size: 1rem; color: #bbb; font-weight: normal; margin-top: 5px;">${totalOvrigtMandates} mandat</p>` : '';
                 ovrigtCard.innerHTML = `
-                    <h3 style="color: #ccc; margin-bottom: 5px;">�vrigt</h3>
-                    <p style="font-size: 0.85rem; color: #888; margin-bottom: 10px;">(Klicka f�r att visa ${hiddenCards.length + (svtOvrigaData ? 1 : 0)} parti${hiddenCards.length + (svtOvrigaData ? 1 : 0) > 1 ? 'er' : ''})</p>
+                    <h3 style="color: #ccc; margin-bottom: 5px;">Övrigt</h3>
+                    <p style="font-size: 0.85rem; color: #888; margin-bottom: 10px;">(Klicka för att visa ${hiddenCards.length + (svtOvrigaData ? 1 : 0)} parti${hiddenCards.length + (svtOvrigaData ? 1 : 0) > 1 ? 'er' : ''})</p>
                     <p>${formatNumber(totalOvrigtVotes)} <span style="font-size: 0.9em; color: #999;">(${percent})</span></p>
                     ${mText}
                 `;
@@ -1038,7 +1050,7 @@
                     svtCard.style.display = 'none';
                     let svtMText = (svtOvrigaData.mandates > 0 && hasMandates) ? `<p style="font-size: 1rem; color: #bbb; font-weight: normal; margin-top: 5px;">${svtOvrigaData.mandates} mandat</p>` : '';
                     svtCard.innerHTML = `
-                        <h3 style="color: #999">�vriga partier</h3>
+                        <h3 style="color: #999">Övriga partier</h3>
                         <p>${formatNumber(svtOvrigaData.votes)} <span style="font-size: 0.9em; color: #999;">(${svtPercent})</span></p>
                         ${svtMText}
                     `;
@@ -1075,7 +1087,10 @@
             const noMandateList = document.getElementById('no-mandate-list');
             
             // Standard för regeringsblocket
+            
             const leftDefaults = ['Moderaterna', 'Sverigedemokraterna', 'Liberalerna', 'Kristdemokraterna'];
+            const rightDefaults = ['Socialdemokraterna', 'Miljöpartiet', 'Vänsterpartiet', 'Centerpartiet'];
+
             
             const savedLayoutJson = localStorage.getItem('roster_layout_' + (window.CURRENT_PATH || 'riksdag'));
             let savedLayout = null;
@@ -1086,7 +1101,7 @@
             const partyPills = {};
 
             Object.keys(parties).forEach(p => {
-                if (p.toLowerCase().includes('�vrig') || p.toLowerCase().includes('vrig')) return;
+                if (p.toLowerCase().includes('vrig') || p.toLowerCase().includes('vrig')) return;
                 
                 const data = parties[p];
                 if (data.votes === 0) return;
@@ -1129,7 +1144,7 @@
                     if (pill && parties[p] && (hasMandates ? parties[p].mandates > 0 : parties[p].votes > 0)) rightList.appendChild(pill);
                 });
                 Object.keys(parties).forEach(p => {
-                    if (p.toLowerCase().includes('�vrig') || p.toLowerCase().includes('vrig')) return;
+                    if (p.toLowerCase().includes('vrig') || p.toLowerCase().includes('vrig')) return;
                     const data = parties[p];
                     if (hasMandates ? data.mandates > 0 : data.votes > 0) {
                         const pill = partyPills[p];
@@ -1140,13 +1155,16 @@
                 });
             } else {
                 Object.keys(parties).forEach(p => {
-                    if (p.toLowerCase().includes('�vrig') || p.toLowerCase().includes('vrig')) return;
+                    if (p.toLowerCase().includes('vrig') || p.toLowerCase().includes('vrig')) return;
                     const data = parties[p];
                     if (hasMandates ? data.mandates > 0 : data.votes > 0) {
                         const pill = partyPills[p];
                         if (pill && pill.parentElement !== leftList && pill.parentElement !== rightList) {
+                            
                             if (leftDefaults.includes(p)) leftList.appendChild(pill);
-                            else rightList.appendChild(pill);
+                            else if (rightDefaults.includes(p)) rightList.appendChild(pill);
+                            else noMandateList.appendChild(pill);
+
                         }
                     }
                 });
@@ -1183,7 +1201,13 @@
             const rightPartiesDOM = Array.from(document.getElementById('sortable-right').children)
                 .filter(el => el.style.display !== 'none').map(el => el.dataset.party);
 
+            
+            let totalMandatesForBlocks = 0;
+            Object.values(parties).forEach(p => totalMandatesForBlocks += (p.mandates || 0));
+            const hasMandates = totalMandatesForBlocks > 0;
+            
             let leftSum = 0, rightSum = 0;
+
             let leftMandates = 0, rightMandates = 0;
             let totalVotes = 0;
             Object.values(parties).forEach(p => totalVotes += p.votes);
@@ -1205,31 +1229,31 @@
             const leftPercent = totalVotes > 0 ? ((leftSum / totalVotes) * 100).toFixed(1) + '%' : '0%';
             const rightPercent = totalVotes > 0 ? ((rightSum / totalVotes) * 100).toFixed(1) + '%' : '0%';
             
-            const leftTitle = getLeftTitle();
-            document.getElementById('left-block-title').innerText = leftTitle;
-
-            document.getElementById('left-block-votes').innerHTML = `${formatNumber(leftSum)} <span style="font-size: 0.8em; color: #999;">(${leftPercent})</span>`;
-            document.getElementById('right-block-votes').innerHTML = `${formatNumber(rightSum)} <span style="font-size: 0.8em; color: #999;">(${rightPercent})</span>`;
-            document.getElementById('left-block-mandates').innerText = leftMandates + ' mandat';
-            document.getElementById('right-block-mandates').innerText = rightMandates + ' mandat';
             
-            // Uppdatera texterna över sliders
+            const leftTitle = hasMandates ? getLeftTitle() : 'Block 1';
+            const rightTitle = hasMandates ? 'Opposition' : 'Block 2';
+            
+            document.getElementById('left-block-title').innerText = leftTitle;
+            document.getElementById('right-block-title').innerText = rightTitle;
+            
+            // Uppdatera texterna �ver sliders
             document.getElementById('left-block-mandate-text').innerText = `${leftTitle}: ${leftMandates} mandat`;
-            document.getElementById('right-block-mandate-text').innerText = `Opposition: ${rightMandates} mandat`;
+            document.getElementById('right-block-mandate-text').innerText = `${rightTitle}: ${rightMandates} mandat`;
             
             document.getElementById('left-block-slider-text').innerText = `${leftTitle}: ${leftPercent}`;
-            document.getElementById('right-block-slider-text').innerText = `Opposition: ${rightPercent}`;
-
+            document.getElementById('right-block-slider-text').innerText = `${rightTitle}: ${rightPercent}`;
+            
             const diff = Math.abs(leftSum - rightSum);
             document.getElementById('diff-votes').innerText = formatNumber(diff) + ' röster';
             let diffText = '';
-            if (leftSum > rightSum) diffText = 'Övertag för ' + leftTitle;
-            else if (rightSum > leftSum) diffText = 'Övertag för Opposition';
+            if (leftSum > rightSum) diffText = '�vertag för ' + leftTitle;
+            else if (rightSum > leftSum) diffText = '�vertag för ' + rightTitle;
             else diffText = 'Exakt lika!';
             document.getElementById('diff-text').innerText = diffText;
             
             const diffTitleEl = document.getElementById('diff-title');
-            if(diffTitleEl) diffTitleEl.innerText = 'Skillnad mellan ' + leftTitle + ' och Opposition';
+            if(diffTitleEl) diffTitleEl.innerText = 'Skillnad mellan ' + leftTitle + ' och ' + rightTitle;
+
 
             // Spara layout per val i webbläsaren
             const layoutState = {
