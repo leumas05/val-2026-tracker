@@ -712,7 +712,7 @@
                     if (pathName.endsWith('.html')) {
                         path = pathName;
                     } else {
-                        path = pathName.replace(///g, '-') + '.html';
+                        path = pathName.split('/').join('-') + '.html';
                     }
                     
                     const cleanName = path.replace('.html', '');
