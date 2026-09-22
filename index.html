@@ -325,12 +325,12 @@
             <div id="error-message" style="color: red; text-align: center; display: none;"></div>
             <!-- Rest of code is unchanged below... -->
             
-            <div style="text-align: center; margin-bottom: 20px;">
+            <div id="parliament-chart-container" style="text-align: center; margin-bottom: 20px;">
                 <canvas id="parliamentChart" style="max-width: 600px; margin: 0 auto;"></canvas>
             </div>
             
-            <!-- Rak Linje för Mandatfördelning -->
-            <div style="text-align: center; margin-top: 10px; margin-bottom: 20px;">
+            <!-- Rak Linje f�r Mandatf�rdelning -->
+            <div id="mandate-bar-container" style="text-align: center; margin-top: 10px; margin-bottom: 20px;">
                 <div style="display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 5px; font-size: 0.9rem; position: relative;">
                     <span id="right-block-mandate-text" style="color: #bbb; z-index: 10;">Opposition: 0 mandat</span>
                     <span id="mandate-target" style="position: absolute; left: 50%; transform: translateX(-50%);">175 mandat</span>
@@ -365,7 +365,7 @@
 
         
 
-        <div class="section">
+        <div id="build-government-section" class="section">
             <h2 id="build-government-title">Bygg din egna regering</h2>
             <p style="text-align: center; color: #bbb; margin-bottom: 20px;">Dra och släpp partierna mellan blocken för att se hur maktfördelningen förändras i realtid!</p>
             <div class="blocks-container">
@@ -935,12 +935,30 @@
             errorDiv.style.display = 'none';
             document.getElementById('data-section').style.display = 'block';
 
-            const partyListDiv = document.getElementById('parties');
+                        const partyListDiv = document.getElementById('parties');
             partyListDiv.innerHTML = ''; 
             
             const sortedParties = Object.entries(parties).sort((a, b) => b[1].votes - a[1].votes);
             let totalVotes = 0;
-            Object.values(parties).forEach(p => totalVotes += p.votes);
+            let totalMandatesFound = 0;
+            Object.values(parties).forEach(p => {
+                totalVotes += p.votes;
+                totalMandatesFound += (p.mandates || 0);
+            });
+
+            const hasMandates = totalMandatesFound > 0;
+            document.getElementById('parliament-chart-container').style.display = hasMandates ? 'block' : 'none';
+            document.getElementById('mandate-bar-container').style.display = hasMandates ? 'block' : 'none';
+            document.getElementById('build-government-section').style.display = hasMandates ? 'block' : 'none';
+            
+            const totalMandatesText = document.getElementById('result-total-mandates');
+            if (hasMandates) {
+                totalMandatesText.style.display = 'block';
+                totalMandatesText.innerText = 'Totalt ' + totalMandatesFound + ' mandat';
+            } else {
+                totalMandatesText.style.display = 'none';
+            }
+
 
             sortedParties.forEach(([name, data]) => {
                 const votes = data.votes;
