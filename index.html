@@ -1390,7 +1390,32 @@
 
             const votesBar = document.getElementById('votesBar');
             votesBar.innerHTML = '';
+            
+            let mergedVotesData = [];
+            let currentOvrigt = null;
+            
             orderedData.forEach(p => {
+                const percentage = (p.votes / totalVotes) * 100;
+                const isGray = p.colorStr === '#444' || p.colorStr === '#AAAAAA';
+                
+                if (isGray && percentage <= 3) {
+                    if (!currentOvrigt) {
+                        currentOvrigt = {
+                            name: 'Övrigt',
+                            votes: p.votes,
+                            colorStr: p.colorStr
+                        };
+                        mergedVotesData.push(currentOvrigt);
+                    } else {
+                        currentOvrigt.votes += p.votes;
+                    }
+                } else {
+                    currentOvrigt = null;
+                    mergedVotesData.push(p);
+                }
+            });
+            
+            mergedVotesData.forEach(p => {
                 const percentage = (p.votes / totalVotes) * 100;
                 const segment = document.createElement('div');
                 segment.className = 'party-segment';
