@@ -922,6 +922,12 @@
             
             // Uppdatera rubriken "Bygg din egna regering/regionstyrelse/kommunstyrelse"
             
+            let totalMandatesFound = 0;
+            Object.values(parties).forEach(p => {
+                totalMandatesFound += (p.mandates || 0);
+            });
+            const hasMandates = totalMandatesFound > 0;
+            
             const buildTitleEl = document.getElementById('build-government-title');
             if (buildTitleEl) {
                 if (!hasMandates) {
@@ -946,13 +952,9 @@
             
             const sortedParties = Object.entries(parties).sort((a, b) => b[1].votes - a[1].votes);
             let totalVotes = 0;
-            let totalMandatesFound = 0;
-            Object.values(parties).forEach(p => {
+                        Object.values(parties).forEach(p => {
                 totalVotes += p.votes;
-                totalMandatesFound += (p.mandates || 0);
             });
-
-            const hasMandates = totalMandatesFound > 0;
             document.getElementById('parliament-chart-container').style.display = hasMandates ? 'block' : 'none';
             document.getElementById('mandate-bar-container').style.display = hasMandates ? 'block' : 'none';
             document.getElementById('build-government-section').style.display = 'block';
