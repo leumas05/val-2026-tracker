@@ -539,6 +539,15 @@
         const leftToRightOrder = ['Vänsterpartiet', 'Socialdemokraterna', 'Miljöpartiet', 'Centerpartiet', 'Övriga partier', 'Liberalerna', 'Moderaterna', 'Kristdemokraterna', 'Sverigedemokraterna'];
         let parliamentChartInstance = null;
 
+        // Rensa gamla sparade layouter en gång så att de nya standard-placeringarna för småpartier slår igenom
+        if (!localStorage.getItem('roster_layout_v2')) {
+            Object.keys(localStorage).forEach(key => {
+                if (key.startsWith('roster_layout_')) localStorage.removeItem(key);
+            });
+            localStorage.setItem('roster_layout_v2', 'true');
+        }
+
+
         // Förbered sök-data och Autocomplete
         window.addEventListener('DOMContentLoaded', () => {
             if (typeof PLATS_MAP !== 'undefined') {
@@ -1150,8 +1159,10 @@
                     const data = parties[p];
                     if (hasMandates ? data.mandates > 0 : data.votes > 0) {
                         const pill = partyPills[p];
-                        if (pill && pill.parentElement !== leftList && pill.parentElement !== rightList) {
-                            rightList.appendChild(pill);
+                        if (pill && pill.parentElement !== leftList && pill.parentElement !== rightList && pill.parentElement !== noMandateList) {
+                            if (leftDefaults.includes(p)) leftList.appendChild(pill);
+                            else if (rightDefaults.includes(p)) rightList.appendChild(pill);
+                            else noMandateList.appendChild(pill);
                         }
                     }
                 });
