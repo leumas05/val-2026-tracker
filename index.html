@@ -708,9 +708,15 @@
                     if (path.includes('kommunval') && !titleText.toLowerCase().includes('kommun')) {
                         titleText += ' kommun';
                     }
-                } else if (pathName.endsWith('.html')) {
-                    path = pathName;
-                    const parts = pathName.replace('.html', '').split('-');
+                } else if (pathName.endsWith('.html') || pathName.split('/').length >= 3) {
+                    if (pathName.endsWith('.html')) {
+                        path = pathName;
+                    } else {
+                        path = pathName.replace(///g, '-') + '.html';
+                    }
+                    
+                    const cleanName = path.replace('.html', '');
+                    const parts = cleanName.split('-');
                     let namePart = parts.slice(2).join(' ');
                     titleText = namePart.charAt(0).toUpperCase() + namePart.slice(1);
                     if (path.includes('kommunval') && !titleText.toLowerCase().includes('kommun')) {
@@ -815,7 +821,16 @@
                                 btn.style.backgroundColor = '#333';
                                 btn.style.color = '#ccc';
                                 const href = a.getAttribute('href');
-                                const slug = href.split('/').pop();
+                                let slug = href.split('/').pop();
+                                if (slug.endsWith('.html')) {
+                                    const parts = slug.replace('.html', '').split('-');
+                                    if (parts.length >= 3) {
+                                        const type = parts[0];
+                                        const code = parts[1];
+                                        const namePart = parts.slice(2).join('-');
+                                        slug = type + '/' + code + '/' + namePart;
+                                    }
+                                }
                                 btn.onclick = () => {
                                     history.pushState({}, '', '/' + slug);
                                     handleRoute();
