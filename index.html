@@ -1129,7 +1129,7 @@
                 
                 const hasInfluence = hasMandates ? data.mandates > 0 : data.votes > 0;
                 if (!hasInfluence) {
-                    pill.style.cursor = 'default';
+                    pill.style.display = 'none';
                     noMandateList.appendChild(pill);
                 } else {
                     pill.style.cursor = 'grab';
