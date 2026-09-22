@@ -1396,7 +1396,7 @@
             
             orderedData.forEach(p => {
                 const percentage = (p.votes / totalVotes) * 100;
-                const isGray = p.colorStr === '#444' || p.colorStr === '#AAAAAA';
+                const isGray = p.colorStr === '#444' || p.colorStr === '#AAAAAA' || p.colorStr === '#666666';
                 
                 if (isGray && percentage <= 3) {
                     if (!currentOvrigt) {
