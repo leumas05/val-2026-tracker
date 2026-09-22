@@ -949,7 +949,9 @@
             const hasMandates = totalMandatesFound > 0;
             document.getElementById('parliament-chart-container').style.display = hasMandates ? 'block' : 'none';
             document.getElementById('mandate-bar-container').style.display = hasMandates ? 'block' : 'none';
-            document.getElementById('build-government-section').style.display = hasMandates ? 'block' : 'none';
+            document.getElementById('build-government-section').style.display = 'block';
+            document.getElementById('left-block-mandates').style.display = hasMandates ? 'block' : 'none';
+            document.getElementById('right-block-mandates').style.display = hasMandates ? 'block' : 'none';
             
             const totalMandatesText = document.getElementById('result-total-mandates');
             if (hasMandates) {
@@ -1031,7 +1033,8 @@
                 pill.style.display = 'block';
                 partyPills[p] = pill;
                 
-                if (data.mandates === 0) {
+                const hasInfluence = hasMandates ? data.mandates > 0 : data.votes > 0;
+                if (!hasInfluence) {
                     pill.style.cursor = 'default';
                     noMandateList.appendChild(pill);
                 } else {
@@ -1042,16 +1045,16 @@
             if (savedLayout) {
                 savedLayout.left.forEach(p => {
                     const pill = partyPills[p];
-                    if (pill && parties[p] && parties[p].mandates > 0) leftList.appendChild(pill);
+                    if (pill && parties[p] && (hasMandates ? parties[p].mandates > 0 : parties[p].votes > 0)) leftList.appendChild(pill);
                 });
                 savedLayout.right.forEach(p => {
                     const pill = partyPills[p];
-                    if (pill && parties[p] && parties[p].mandates > 0) rightList.appendChild(pill);
+                    if (pill && parties[p] && (hasMandates ? parties[p].mandates > 0 : parties[p].votes > 0)) rightList.appendChild(pill);
                 });
                 Object.keys(parties).forEach(p => {
                     if (p.toLowerCase().includes('�vrig') || p.toLowerCase().includes('vrig')) return;
                     const data = parties[p];
-                    if (data.mandates > 0) {
+                    if (hasMandates ? data.mandates > 0 : data.votes > 0) {
                         const pill = partyPills[p];
                         if (pill && pill.parentElement !== leftList && pill.parentElement !== rightList) {
                             rightList.appendChild(pill);
@@ -1062,7 +1065,7 @@
                 Object.keys(parties).forEach(p => {
                     if (p.toLowerCase().includes('�vrig') || p.toLowerCase().includes('vrig')) return;
                     const data = parties[p];
-                    if (data.mandates > 0) {
+                    if (hasMandates ? data.mandates > 0 : data.votes > 0) {
                         const pill = partyPills[p];
                         if (pill && pill.parentElement !== leftList && pill.parentElement !== rightList) {
                             if (leftDefaults.includes(p)) leftList.appendChild(pill);
