@@ -555,12 +555,10 @@
                 window.SEARCH_OPTIONS = [];
                 Object.keys(PLATS_MAP).forEach(name => {
                     const svtPath = PLATS_MAP[name];
-                    if (svtPath.includes('riksdagsval')) return;
-                    
                     const codeMatch = svtPath.match(/-(.*?)-/);
                     const code = codeMatch ? codeMatch[1] : '';
                     
-                    const prefix = svtPath.includes('kommunval') ? 'kommunval/' : 'regionval/';
+                    const prefix = svtPath.includes('kommunval') ? 'kommunval/' : (svtPath.includes('regionval') ? 'regionval/' : 'riksdagsval/');
                     const fullSlug = prefix + code + '/' + slugify(name);
                     const capitalized = name.charAt(0).toUpperCase() + name.slice(1);
                     
