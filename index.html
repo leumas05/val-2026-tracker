@@ -590,8 +590,43 @@
                 
                 const matches = window.SEARCH_OPTIONS.filter(opt => opt.name.includes(val.toLowerCase()));
                 
+                matches.sort((a, b) => {
+                    const typeA = a.fullSlug.split('/')[0];
+                    const typeB = b.fullSlug.split('/')[0];
+                    if (typeA === typeB) return a.capitalized.localeCompare(b.capitalized);
+                    if (typeA === 'kommunval') return -1;
+                    if (typeB === 'kommunval') return 1;
+                    if (typeA === 'regionval') return -1;
+                    if (typeB === 'regionval') return 1;
+                    return 0;
+                });
+                
+                let currentGroup = '';
                 matches.forEach((match, index) => {
+                    const matchType = match.fullSlug.split('/')[0];
+                    if (matchType !== currentGroup) {
+                        currentGroup = matchType;
+                        const divider = document.createElement('li');
+                        divider.className = 'autocomplete-divider';
+                        divider.style.backgroundColor = '#111';
+                        divider.style.color = '#888';
+                        divider.style.fontSize = '0.75rem';
+                        divider.style.textTransform = 'uppercase';
+                        divider.style.letterSpacing = '1px';
+                        divider.style.padding = '4px 15px';
+                        divider.style.cursor = 'default';
+                        divider.style.borderBottom = '1px solid #222';
+                        divider.style.pointerEvents = 'none';
+                        
+                        let label = 'Kommunval';
+                        if (matchType === 'regionval') label = 'Regionval';
+                        else if (matchType === 'riksdagsval') label = 'Riksdagsvalkrets';
+                        divider.innerText = label;
+                        
+                        list.appendChild(divider);
+                    }
                     const li = document.createElement('li');
+                    li.className = 'autocomplete-item';
                     
                     // Markera det som matchar med fetstil
                     const startIndex = match.name.indexOf(val.toLowerCase());
@@ -613,7 +648,7 @@
             });
 
             input.addEventListener('keydown', function(e) {
-                let x = list.getElementsByTagName('li');
+                let x = list.querySelectorAll('.autocomplete-item');
                 if (e.keyCode === 40) { // Ner
                     currentFocus++;
                     addActive(x);
