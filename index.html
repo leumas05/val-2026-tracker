@@ -293,6 +293,7 @@
     <div class="container">
         <header style="margin-bottom: 20px;">
             <h1 id="page-title" style="margin-bottom: 10px;">Val 2026: Riksdagen</h1>
+            <div id="election-tabs-container" style="display: none; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;"></div>
             <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 15px;">
                 <p style="margin: 0;">Liveresultat direkt från SVT</p>
                 
@@ -683,24 +684,30 @@
 
         window.addEventListener('popstate', handleRoute);
 
-        function handleRoute() {
+                function handleRoute() {
             let pathName = decodeURIComponent(window.location.pathname.substring(1)).toLowerCase();
-            // Ta bort eventuell avslutande slash
             if (pathName.endsWith('/')) pathName = pathName.slice(0, -1);
             
             let path = '';
             let titleText = 'Riket (Hela Sverige)';
 
-            if (pathName && window.SLUG_MAP) {
-                const match = window.SLUG_MAP[pathName];
-                if (match) {
+            if (pathName) {
+                if (window.SLUG_MAP && window.SLUG_MAP[pathName]) {
+                    const match = window.SLUG_MAP[pathName];
                     path = match.svtPath;
                     titleText = match.name.charAt(0).toUpperCase() + match.name.slice(1);
                     if (path.includes('kommunval') && !titleText.toLowerCase().includes('kommun')) {
                         titleText += ' kommun';
                     }
+                } else if (pathName.endsWith('.html')) {
+                    path = pathName;
+                    const parts = pathName.replace('.html', '').split('-');
+                    let namePart = parts.slice(2).join(' ');
+                    titleText = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+                    if (path.includes('kommunval') && !titleText.toLowerCase().includes('kommun')) {
+                        titleText += ' kommun';
+                    }
                 } else {
-                    // Om ogiltig URL (t.ex. /asdf), gå till riket
                     history.replaceState({}, '', '/');
                     pathName = '';
                 }
@@ -764,6 +771,53 @@
                             invalidVotesP.innerText = text;
                             invalidVotesP.style.display = 'block';
                         }
+                    }
+
+
+                    const tabContainer = document.getElementById('election-tabs-container');
+                    tabContainer.innerHTML = '';
+                    tabContainer.style.display = 'none';
+
+                    const tabBar = tempDiv.querySelector('.val_electionsTabBar');
+                    if (tabBar) {
+                        tabContainer.style.display = 'flex';
+                        
+                        tabBar.querySelectorAll('li').forEach(li => {
+                            const a = li.querySelector('a');
+                            const btn = document.createElement('button');
+                            btn.style.padding = '8px 16px';
+                            btn.style.border = 'none';
+                            btn.style.borderRadius = '20px';
+                            btn.style.cursor = 'pointer';
+                            btn.style.fontWeight = 'bold';
+                            btn.style.fontSize = '0.9rem';
+                            btn.style.transition = 'opacity 0.2s';
+                            
+                            btn.onmouseover = () => btn.style.opacity = '0.8';
+                            btn.onmouseout = () => btn.style.opacity = '1';
+
+                            if (li.classList.contains('val_electionsTabBar-tab_active')) {
+                                btn.innerText = li.textContent.trim();
+                                btn.style.backgroundColor = '#3498db';
+                                btn.style.color = '#fff';
+                                btn.style.boxShadow = '0 2px 5px rgba(0,0,0,0.3)';
+                            } else if (a) {
+                                btn.innerText = a.textContent.trim();
+                                btn.style.backgroundColor = '#333';
+                                btn.style.color = '#ccc';
+                                const href = a.getAttribute('href');
+                                const slug = href.split('/').pop();
+                                btn.onclick = () => {
+                                    history.pushState({}, '', '/' + slug);
+                                    handleRoute();
+                                };
+                            } else {
+                                btn.innerText = li.textContent.trim();
+                                btn.style.backgroundColor = '#333';
+                                btn.style.color = '#ccc';
+                            }
+                            tabContainer.appendChild(btn);
+                        });
                     }
 
                     const parties = {};
