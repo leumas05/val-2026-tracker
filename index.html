@@ -792,7 +792,12 @@
                     tabContainer.style.display = 'none';
 
                     const tabBar = tempDiv.querySelector('.val_electionsTabBar');
-                    if (tabBar) {
+                    
+                    const urlCodeMatch = (window.CURRENT_PATH || '').match(/-(\d+)-/);
+                    const urlCode = urlCodeMatch ? urlCodeMatch[1] : '';
+                    const isRegionOrValkrets = urlCode.length === 2 || (window.CURRENT_PATH || '').includes('regionval-0980');
+                    
+                    if (tabBar && !isRegionOrValkrets) {
                         tabContainer.style.display = 'flex';
                         
                         tabBar.querySelectorAll('li').forEach(li => {
