@@ -30,8 +30,8 @@ Följ dessa steg för att köra projektet på din egen dator.
 
 1. **Klona repot**
    ```bash
-   git clone https://github.com/leumas05/R-ster.git
-   cd R-ster
+   git clone https://github.com/leumas05/val-2026-tracker.git
+   cd val-2026-tracker
    ```
 
 2. **Installera beroenden**  
