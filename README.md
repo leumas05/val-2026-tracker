@@ -64,3 +64,7 @@ Har du idéer på förbättringar, hittat en bugg eller vill lägga till en ny f
 ## 📄 Licens
 
 Detta projekt är skapat för utbildningssyfte och personligt bruk. All valdata som presenteras hämtas externt (SVT).
+
+---
+
+*Skapad av [S4m.dev](https://www.s4m.dev/)*
